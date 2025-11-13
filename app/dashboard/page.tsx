@@ -237,7 +237,7 @@ function DashboardContent() {
               setTimeout(() => {
                 loadData();
                 setIsLoading(false);
-              }, 600); // pequeño delay visual
+              }, 600); // pequeño delay visual hasta que exista api real
             }}
             disabled={isLoading}
             className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2

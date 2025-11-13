@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { login } from "@/lib/auth";
 import { useRouter } from "next/navigation";
@@ -9,28 +8,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
+    // Simulación de login
+    await new Promise((r) => setTimeout(r, 800)); // breve delay opcional
     const user = login(email, password);
 
     if (user) {
-      if (user.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push(user.role === "admin" ? "/admin" : "/dashboard");
     } else {
       setError("Credenciales incorrectas");
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -53,6 +56,7 @@ export default function LoginPage() {
           <p className="text-center text-slate-400 mb-8">Minera Centinela</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* EMAIL */}
             <div className="space-y-2">
               <Label htmlFor="email" className="text-slate-300">
                 Correo electrónico
@@ -68,19 +72,32 @@ export default function LoginPage() {
               />
             </div>
 
-            <div className="space-y-2">
+            {/* CONTRASEÑA */}
+            <div className="space-y-2 relative">
               <Label htmlFor="password" className="text-slate-300">
                 Contraseña
               </Label>
               <Input
                 id="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
+                className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20 pr-10"
                 placeholder="••••••••"
                 required
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-200 transition-colors"
+                tabIndex={-1}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
 
             {error && (
@@ -89,11 +106,22 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* BOTÓN LOGIN CON SPINNER */}
             <Button
               type="submit"
-              className="w-full bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold py-6 rounded-xl shadow-lg shadow-orange-900/50 transition-all duration-300"
+              disabled={isLoading}
+              className={`w-full bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold py-2 rounded-xl shadow-lg shadow-orange-900/50 transition-all duration-300 flex items-center justify-center gap-2 ${
+                isLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
-              Iniciar Sesión
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Iniciando sesión...
+                </>
+              ) : (
+                "Iniciar Sesión"
+              )}
             </Button>
           </form>
 
