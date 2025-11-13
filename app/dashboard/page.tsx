@@ -12,7 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { X, Bus, Clock, Calendar, LogOut, User } from "lucide-react";
+import { X, Bus, Clock, Calendar, LogOut, User, RotateCw } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -40,6 +40,7 @@ function DashboardContent() {
     "all" | "ida" | "vuelta"
   >("all");
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const user = getCurrentUser();
 
@@ -148,77 +149,111 @@ function DashboardContent() {
 
       <div className="container mx-auto px-4 py-6 md:py-8 space-y-6">
         {/* FILTROS DE BÚSQUEDA */}
-        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row gap-4">
-          {/* SELECT DE CIUDAD */}
-          <div className="flex flex-col">
-            <label className="text-slate-400 text-xs mb-1">Ciudad</label>
+        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* SELECT DE CIUDAD */}
+            <div className="flex flex-col">
+              <label className="text-slate-400 text-xs mb-1">Ciudad</label>
 
-            <div className="relative min-w-[230px]">
-              <select
-                value={selectedRoute === "all" ? "" : selectedRoute}
-                onChange={(e) =>
-                  setSelectedRoute(
-                    e.target.value === "" ? "all" : (e.target.value as any)
-                  )
-                }
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-              >
-                <option value="">Todas</option>
-                <option value="antofagasta">Antofagasta</option>
-                <option value="calama">Calama</option>
-              </select>
-
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </div>
-          </div>
-
-          {/* SELECTOR DE FECHA */}
-          <div className="flex flex-col">
-            <label className="text-slate-400 text-xs mb-1">
-              Fecha de salida
-            </label>
-
-            <div className="relative min-w-[250px]">
-              <DatePicker
-                selected={selectedDate ? new Date(selectedDate) : null}
-                onChange={(date: Date | null) =>
-                  setSelectedDate(date ? date.toISOString().split("T")[0] : "")
-                }
-                locale="es"
-                dateFormat="dd/MM/yyyy"
-                placeholderText="Seleccionar fecha"
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 pr-10 w-full"
-                calendarClassName="!bg-slate-900 border border-slate-800 text-white rounded-lg shadow-xl"
-                dayClassName={() =>
-                  "hover:bg-blue-600/30 text-white transition-colors duration-200 rounded-md"
-                }
-              />
-
-              {selectedDate && (
-                <button
-                  type="button"
-                  onClick={() => setSelectedDate("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
-                  title="Quitar fecha"
+              <div className="relative min-w-[230px]">
+                <select
+                  value={selectedRoute === "all" ? "" : selectedRoute}
+                  onChange={(e) =>
+                    setSelectedRoute(
+                      e.target.value === "" ? "all" : (e.target.value as any)
+                    )
+                  }
+                  className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
                 >
-                  <X size={16} />
-                </button>
-              )}
+                  <option value="">Todas</option>
+                  <option value="antofagasta">Antofagasta</option>
+                  <option value="calama">Calama</option>
+                </select>
+
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            {/* SELECTOR DE FECHA */}
+            <div className="flex flex-col">
+              <label className="text-slate-400 text-xs mb-1">
+                Fecha de salida
+              </label>
+
+              <div className="relative min-w-[250px]">
+                <DatePicker
+                  selected={selectedDate ? new Date(selectedDate) : null}
+                  onChange={(date: Date | null) =>
+                    setSelectedDate(
+                      date ? date.toISOString().split("T")[0] : ""
+                    )
+                  }
+                  locale="es"
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Seleccionar fecha"
+                  className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 pr-10 w-full"
+                  calendarClassName="!bg-slate-900 border border-slate-800 text-white rounded-lg shadow-xl"
+                  dayClassName={() =>
+                    "hover:bg-blue-600/30 text-white transition-colors duration-200 rounded-md"
+                  }
+                />
+
+                {selectedDate && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDate("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
+                    title="Quitar fecha"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
+
+          {/* BOTÓN ACTUALIZAR */}
+          <Button
+            // onClick={async () => {
+            //   setIsLoading(true);
+            //   await loadData();
+            //   setIsLoading(false);
+            // }}
+            onClick={() => {
+              setIsLoading(true);
+              setTimeout(() => {
+                loadData();
+                setIsLoading(false);
+              }, 600); // pequeño delay visual
+            }}
+            disabled={isLoading}
+            className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2
+             ${
+               isLoading
+                 ? "opacity-60 cursor-not-allowed"
+                 : "hover:bg-slate-800"
+             }`}
+          >
+            <RotateCw
+              className={`w-4 h-4 ${
+                isLoading ? "animate-spin" : ""
+              } transition-colors duration-300`}
+            />
+            <span>{isLoading ? "Actualizando..." : "Actualizar"}</span>
+          </Button>
         </div>
 
         {/* SERVICIOS DISPONIBLES */}

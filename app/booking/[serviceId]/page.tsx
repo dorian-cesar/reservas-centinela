@@ -99,10 +99,10 @@ function BookingContent() {
       console.log("Reservation created successfully");
       setShowConfirmation(true);
 
-      setTimeout(() => {
-        console.log("Redirecting to dashboard");
-        router.push("/dashboard");
-      }, 2000);
+      // setTimeout(() => {
+      //   console.log("Redirecting to dashboard");
+      //   router.push("/dashboard");
+      // }, 2000);
     } catch (error) {
       console.error("Error creating reservation:", error);
       setIsLoading(false);
@@ -135,27 +135,82 @@ function BookingContent() {
     });
   };
 
-  if (showConfirmation) {
+  if (showConfirmation && service) {
+    const user = getCurrentUser();
     return (
       <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
-        <Card className="bg-slate-900/50 border-green-700/50 p-8 md:p-12 max-w-md text-center">
+        <Card className="bg-slate-900/50 border-green-700/50 p-8 md:p-10 max-w-lg text-center">
+          {/* Ícono de éxito */}
           <div className="mb-6 flex justify-center">
-            <div className="bg-green-600 rounded-full p-4 md:p-6 animate-bounce">
+            <div className="bg-green-600 rounded-full p-4 md:p-6 animate-soft-pulse shadow-lg shadow-green-900/50">
               <CheckCircle className="w-12 h-12 md:w-16 md:h-16 text-white" />
             </div>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-            Reserva Confirmada
+
+          {/* Título */}
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+            ¡Reserva Confirmada!
           </h2>
           <p className="text-sm md:text-base text-slate-300 mb-2">
-            Tu asiento ha sido reservado exitosamente
+            Tu asiento ha sido reservado exitosamente.
           </p>
-          <p className="text-green-400 font-semibold text-lg md:text-xl mb-6">
-            Asiento #{selectedSeat !== null ? selectedSeat + 1 : ""}
+
+          {/* Nombre del usuario */}
+          <p className="text-base md:text-lg font-semibold text-slate-300 mb-2">
+            {user?.name || ""}
           </p>
-          <p className="text-xs md:text-sm text-slate-400">
-            Redirigiendo al dashboard...
-          </p>
+
+          {/* Datos del servicio */}
+          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-6 text-left space-y-3">
+            <div>
+              <p className="text-xs md:text-sm text-slate-400">Asiento</p>
+              <p className="text-xl md:text-2xl font-bold text-green-400">
+                #{selectedSeat !== null ? selectedSeat + 1 : ""}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs md:text-sm text-slate-400">Ruta</p>
+              <p className="text-base md:text-lg font-semibold text-white">
+                {getRouteDisplay(service.route)} -{" "}
+                {getDirectionDisplay(service.direction)}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs md:text-sm text-slate-400">Fecha</p>
+              <p className="text-sm md:text-base font-medium text-slate-200 capitalize">
+                {formatDate(service.date)}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              <div>
+                <p className="text-xs md:text-sm text-slate-400">
+                  Hora de salida
+                </p>
+                <p className="text-base md:text-lg font-semibold text-orange-400">
+                  {service.departureTime}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs md:text-sm text-slate-400">
+                  Hora de llegada
+                </p>
+                <p className="text-base md:text-lg font-semibold text-blue-400">
+                  {service.arrivalTime}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Botón para volver */}
+          <Button
+            onClick={() => router.push("/dashboard")}
+            className="mt-8 w-full bg-blue-800 hover:bg-blue-900 text-white font-semibold py-3 rounded-lg transition-all duration-300"
+          >
+            Volver al listado de viajes
+          </Button>
         </Card>
       </div>
     );
@@ -165,17 +220,7 @@ function BookingContent() {
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
       <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800">
         <div className="container mx-auto px-4 py-3 md:py-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-            <Link href="/dashboard">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
-              >
-                <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-2" />
-                Volver
-              </Button>
-            </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
               <Image
                 src="/img/logo-tandem-2026.png"
@@ -193,6 +238,17 @@ function BookingContent() {
                 </p>
               </div>
             </div>
+
+            <Link href="/dashboard" className="ml-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              >
+                <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-2" />
+                Volver
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -261,7 +317,7 @@ function BookingContent() {
               <Button
                 onClick={handleConfirmReservation}
                 disabled={isLoading}
-                className="w-full bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-bold py-4 md:py-6 text-base md:text-lg rounded-xl shadow-lg shadow-orange-900/50 transition-all duration-300"
+                className="w-full bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-bold py-4 md:py-6 text-base md:text-lg rounded-xl shadow-lg shadow-orange-900/50 transition-all duration-300 cursor-pointer"
               >
                 {isLoading ? "Confirmando..." : "Confirmar Reserva"}
               </Button>

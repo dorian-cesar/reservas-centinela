@@ -21,7 +21,6 @@ export function BusSeatLayout({
 
   const getSeatNumber = (rowIndex: number, colIndex: number): number | null => {
     if (colIndex === 2) return null;
-
     const seatsBeforeRow = rowIndex * 4;
     const seatInRow = colIndex > 2 ? colIndex - 1 : colIndex;
     return seatsBeforeRow + seatInRow;
@@ -42,9 +41,7 @@ export function BusSeatLayout({
     const isSelected = seatNumber === selectedSeat;
     const isHovered = seatNumber === hoveredSeat;
 
-    if (status === "aisle") {
-      return "bg-transparent";
-    }
+    if (status === "aisle") return "bg-transparent";
 
     if (status === "user-reserved") {
       return "bg-green-600 text-white border-2 border-green-400 cursor-not-allowed shadow-lg shadow-green-900/50";
@@ -52,8 +49,8 @@ export function BusSeatLayout({
 
     if (status === "available") {
       return cn(
-        "bg-slate-800 text-slate-400 border-2 border-slate-700 cursor-pointer transition-all duration-300",
-        "hover:bg-blue-700 hover:border-blue-500 hover:text-white hover:scale-110 hover:shadow-lg hover:shadow-blue-900/50",
+        "bg-slate-800 text-slate-400 border-2 border-slate-700 cursor-pointer transition-all duration-300 relative overflow-hidden",
+        "hover:bg-blue-700 hover:border-blue-500 hover:text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-900/50",
         isSelected &&
           "bg-orange-600 border-orange-400 text-white scale-110 shadow-lg shadow-orange-900/50",
         isHovered && !isSelected && "scale-105"
@@ -65,7 +62,7 @@ export function BusSeatLayout({
 
   return (
     <div className="max-w-md mx-auto">
-      {/* Driver Section */}
+      {/* Sección del conductor */}
       <div className="mb-6 md:mb-8 flex items-center justify-between bg-slate-800/50 rounded-t-3xl p-4 md:p-6 border-2 border-slate-700">
         <div className="flex items-center gap-2 md:gap-3">
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center">
@@ -77,7 +74,7 @@ export function BusSeatLayout({
         </div>
       </div>
 
-      {/* Seats Grid */}
+      {/* Grid de asientos */}
       <div className="bg-slate-900/70 rounded-3xl p-4 md:p-8 border-2 border-slate-800 shadow-2xl">
         <div className="space-y-3 md:space-y-4">
           {layout.map((row, rowIndex) => (
@@ -86,7 +83,6 @@ export function BusSeatLayout({
                 const seatNumber = getSeatNumber(rowIndex, colIndex);
                 const status = getSeatStatus(rowIndex, colIndex);
 
-                // Aisle
                 if (colIndex === 2) {
                   return (
                     <div
@@ -112,16 +108,20 @@ export function BusSeatLayout({
                     onMouseLeave={() => setHoveredSeat(null)}
                     disabled={status !== "available"}
                     className={cn(
-                      "w-11 h-11 md:w-14 md:h-14 rounded-xl flex items-center justify-center font-bold text-sm relative",
+                      // quitamos justify-between → usamos justify-center y gap
+                      "w-11 h-11 md:w-14 md:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 font-bold text-xs relative select-none",
                       getSeatClasses(status, seatNumber)
                     )}
                   >
                     {status !== "aisle" && (
                       <>
-                        <Armchair className="w-5 h-5 md:w-6 md:h-6" />
-                        <span className="absolute -bottom-5 md:-bottom-6 text-[10px] md:text-xs text-slate-500 font-normal">
+                        {/* Número arriba */}
+                        <span className="text-[10px] md:text-xs font-semibold text-white/80 leading-none">
                           {seatNumber !== null && seatNumber + 1}
                         </span>
+
+                        {/* Icono del asiento */}
+                        <Armchair className="w-4 h-4 md:w-5 md:h-5 opacity-90" />
                       </>
                     )}
                   </button>
@@ -131,39 +131,26 @@ export function BusSeatLayout({
           ))}
         </div>
 
-        {/* Legend */}
+        {/* Leyenda */}
         <div className="mt-10 md:mt-12 pt-4 md:pt-6 border-t border-slate-800">
           <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-slate-800 border-2 border-slate-700 flex items-center justify-center shrink-0">
-                <Armchair className="w-4 h-4 md:w-5 md:h-5 text-slate-400" />
+            {[
+              ["bg-slate-800 border-slate-700 text-slate-400", "Disponible"],
+              ["bg-slate-700/30 border-slate-700/50 text-slate-600", "Ocupado"],
+              ["bg-orange-600 border-orange-400 text-white", "Seleccionado"],
+              ["bg-green-600 border-green-400 text-white", "Tu reserva"],
+            ].map(([classes, label], i) => (
+              <div key={i} className="flex items-center gap-2 md:gap-3">
+                <div
+                  className={`w-8 h-8 md:w-10 md:h-10 rounded-lg border-2 flex items-center justify-center shrink-0 ${classes}`}
+                >
+                  <Armchair className="w-4 h-4 md:w-5 md:h-5" />
+                </div>
+                <span className="text-xs md:text-sm text-slate-400">
+                  {label}
+                </span>
               </div>
-              <span className="text-xs md:text-sm text-slate-400">
-                Disponible
-              </span>
-            </div>
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-slate-700/30 border-2 border-slate-700/50 flex items-center justify-center shrink-0">
-                <Armchair className="w-4 h-4 md:w-5 md:h-5 text-slate-600" />
-              </div>
-              <span className="text-xs md:text-sm text-slate-400">Ocupado</span>
-            </div>
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-orange-600 border-2 border-orange-400 flex items-center justify-center shadow-lg shadow-orange-900/50 shrink-0">
-                <Armchair className="w-4 h-4 md:w-5 md:h-5 text-white" />
-              </div>
-              <span className="text-xs md:text-sm text-slate-400">
-                Seleccionado
-              </span>
-            </div>
-            <div className="flex items-center gap-2 md:gap-3">
-              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-green-600 border-2 border-green-400 flex items-center justify-center shadow-lg shadow-green-900/50 shrink-0">
-                <Armchair className="w-4 h-4 md:w-5 md:h-5 text-white" />
-              </div>
-              <span className="text-xs md:text-sm text-slate-400">
-                Tu reserva
-              </span>
-            </div>
+            ))}
           </div>
         </div>
       </div>
