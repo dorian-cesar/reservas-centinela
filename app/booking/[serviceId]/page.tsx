@@ -13,15 +13,9 @@ import {
 import { BusSeatLayout } from "@/components/bus-seat-layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Bus,
-  MapPin,
-  Calendar,
-  Clock,
-  ArrowLeft,
-  CheckCircle,
-} from "lucide-react";
+import { MapPin, Calendar, Clock, ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function BookingPage() {
   return (
@@ -176,16 +170,20 @@ function BookingContent() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-slate-700 text-slate-300 hover:bg-slate-800 bg-transparent"
+                className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
               >
                 <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-2" />
                 Volver
               </Button>
             </Link>
             <div className="flex items-center gap-3">
-              <div className="bg-linear-to-br from-blue-600 to-blue-800 p-2 md:p-3 rounded-xl shadow-lg shadow-blue-900/50">
-                <Bus className="w-5 h-5 md:w-6 md:h-6 text-white" />
-              </div>
+              <Image
+                src="/img/logo-tandem-2026.png"
+                alt="Bus"
+                width={160}
+                height={40}
+                className="object-contain"
+              />
               <div>
                 <h1 className="text-lg md:text-xl font-bold text-white">
                   Selecciona tu Asiento
