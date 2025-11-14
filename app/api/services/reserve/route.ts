@@ -1,0 +1,41 @@
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+    const { userId, serviceId, seatNumber } = body;
+
+    if (!userId || !serviceId || !seatNumber) {
+      return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
+    }
+
+    // Llamada a la API externa
+    const res = await fetch(
+      "https://reserva-centinela.dev-wit.com/api/reservations/reserve",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId, serviceId, seatNumber }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: data?.message || "Error al reservar asiento" },
+        { status: res.status }
+      );
+    }
+
+    return NextResponse.json({ success: true, data });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json(
+      { error: error.message || "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}

@@ -294,7 +294,7 @@ function DashboardContent() {
                     </div>
                   </div>
 
-                  {reserved ? (
+                  {/* {reserved ? (
                     <Button
                       disabled
                       size="sm"
@@ -302,19 +302,19 @@ function DashboardContent() {
                     >
                       Ya tienes una reserva
                     </Button>
-                  ) : (
-                    <Link
-                      href={`/booking/${service._id}`}
-                      className="w-full sm:w-auto"
+                  ) : ( */}
+                  <Link
+                    href={`/booking/${service._id}`}
+                    className="w-full sm:w-auto"
+                  >
+                    <Button
+                      size="sm"
+                      className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
                     >
-                      <Button
-                        size="sm"
-                        className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
-                      >
-                        Reservar Asiento
-                      </Button>
-                    </Link>
-                  )}
+                      Reservar Asiento
+                    </Button>
+                  </Link>
+                  {/* )} */}
                 </Card>
               );
             })}

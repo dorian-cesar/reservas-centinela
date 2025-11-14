@@ -7,6 +7,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { BusSeatLayout } from "@/components/bus-seat-layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import { MapPin, Calendar, Clock, ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,6 +24,7 @@ export default function BookingPage() {
 }
 
 function BookingContent() {
+  const { toast } = useToast();
   const params = useParams();
   const router = useRouter();
   const serviceId = params.serviceId as string;
@@ -30,9 +32,9 @@ function BookingContent() {
   const { getServiceById } = useServicesStore();
 
   const [service, setService] = useState<ApiBusService | null>(null);
-  const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
+  const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [userReservedSeat, setUserReservedSeat] = useState<
-    number | undefined
+    string | undefined
   >();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +58,7 @@ function BookingContent() {
     // detectar si el usuario ya tiene asiento reservado
     if (userId) {
       const found = srv.seats.find((s) => s.reservedBy === userId);
-      if (found) setUserReservedSeat(Number(found.seatNumber));
+      if (found) setUserReservedSeat(found.seatNumber);
     }
   }, [serviceId, userId, getServiceById, router]);
 
@@ -74,23 +76,65 @@ function BookingContent() {
   const buildFinalLayout = () => {
     if (!service) return [];
 
-    const piso1 = mapSeatMap(service.busLayout.floor1.seatMap);
+    const piso1 = service.busLayout.floor1.seatMap; // ya vienen como strings
 
-    // Asientos reservados (array de números)
     const reservedNumbers = service.seats
       .filter((s) => s.reserved)
-      .map((s) => Number(s.seatNumber));
+      .map((s) => s.seatNumber);
 
-    // Marca como "1" los reservados reales
-    return piso1.map((row, rIdx) =>
-      row.map((col, cIdx) => {
-        const seatNumber = rIdx * row.length + cIdx;
-        return reservedNumbers.includes(seatNumber) ? 1 : col;
+    return piso1.map((row) =>
+      row.map((seatValue) => {
+        if (!seatValue) return ""; // pasillo
+        if (seatValue === "WC") return "WC"; // baño
+        return seatValue; // el número real del asiento
       })
     );
   };
 
   const finalLayout = buildFinalLayout();
+
+  const handleSeatSelect = async (seatNumber: string) => {
+    if (!userId || !service || isLoading) return;
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/services/reserve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, serviceId: service._id, seatNumber }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast({
+          title: "Error",
+          description: data.error || "No se pudo reservar el asiento",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Si todo salió bien
+      setSelectedSeat(seatNumber);
+      setUserReservedSeat(seatNumber);
+
+      // toast({
+      //   title: "Éxito",
+      //   description: `Asiento ${seatNumber} reservado correctamente`,
+      //   variant: "default",
+      // });
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo reservar el asiento",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // ---------------------------
   // CONFIRMAR RESERVA (MOCK)
@@ -160,7 +204,7 @@ function BookingContent() {
             <div>
               <p className="text-xs md:text-sm text-slate-400">Asiento</p>
               <p className="text-xl md:text-2xl font-bold text-green-400">
-                #{selectedSeat! + 1}
+                #{selectedSeat}
               </p>
             </div>
 
@@ -276,7 +320,7 @@ function BookingContent() {
                     Asiento Seleccionado
                   </p>
                   <p className="text-3xl font-bold text-orange-400">
-                    #{selectedSeat + 1}
+                    #{selectedSeat}
                   </p>
                 </div>
               )}
@@ -294,13 +338,23 @@ function BookingContent() {
           </div>
 
           {/* LAYOUT */}
-          <div className="order-1 lg:order-2">
+          <div className="order-1 lg:order-2 relative">
             <BusSeatLayout
               layout={finalLayout}
               selectedSeat={selectedSeat}
               userReservedSeat={userReservedSeat}
-              onSeatSelect={setSelectedSeat}
+              onSeatSelect={(seatNumber) => {
+                if (isLoading) return;
+                handleSeatSelect(seatNumber);
+              }}
+              seats={service.seats}
             />
+
+            {isLoading && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-10 rounded-xl">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
+              </div>
+            )}
           </div>
         </div>
       </div>
