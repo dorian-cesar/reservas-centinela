@@ -4,12 +4,7 @@ import { AuthGuard } from "@/components/auth-guard";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import {
-  getServices,
-  createReservation,
-  getUserReservations,
-  type BusService,
-} from "@/lib/booking-store";
+import { type ApiBusService } from "@/lib/booking-store";
 import { BusSeatLayout } from "@/components/bus-seat-layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -30,9 +25,9 @@ function BookingContent() {
   const router = useRouter();
   const serviceId = params.serviceId as string;
 
-  const [userId] = useState(() => getCurrentUser()?.id);
+  const [userId] = useState(() => getCurrentUser()?._id);
 
-  const [service, setService] = useState<BusService | null>(null);
+  const [service, setService] = useState<ApiBusService | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
   const [userReservedSeat, setUserReservedSeat] = useState<number | undefined>(
     undefined
@@ -47,7 +42,7 @@ function BookingContent() {
     });
 
     const services = getServices();
-    const foundService = services.find((s) => s.id === serviceId);
+    const foundService = services.find((s) => s._id === serviceId);
 
     if (!foundService) {
       console.log("Service not found, redirecting to dashboard");
@@ -73,7 +68,7 @@ function BookingContent() {
     console.log("Confirm reservation clicked", {
       selectedSeat,
       userId,
-      service: service?.id,
+      service: service?._id,
     });
 
     if (!selectedSeat && selectedSeat !== 0) {
@@ -95,7 +90,7 @@ function BookingContent() {
 
     try {
       console.log("Creating reservation...");
-      createReservation(userId, service.id, selectedSeat);
+      createReservation(userId, service._id, selectedSeat);
       console.log("Reservation created successfully");
       setShowConfirmation(true);
 
