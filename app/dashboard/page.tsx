@@ -163,7 +163,7 @@ function DashboardContent() {
               <select
                 value={selectedOrigin}
                 onChange={(e) => setSelectedOrigin(e.target.value)}
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[150px]"
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[300px]"
               >
                 <option value="">Seleccionar</option>
 
@@ -184,7 +184,7 @@ function DashboardContent() {
                 value={selectedDestination}
                 onChange={(e) => setSelectedDestination(e.target.value)}
                 disabled={destinations.length === 0}
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[150px]"
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[300px]"
               >
                 <option value="">Seleccionar</option>
 
