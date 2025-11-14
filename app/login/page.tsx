@@ -2,7 +2,6 @@
 
 import type React from "react";
 import { useState } from "react";
-import { login } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,15 +22,31 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    const user = await login(email, password);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
 
-    if (!user) {
-      setError("Credenciales incorrectas");
-      setIsLoading(false);
-      return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Credenciales incorrectas");
+        setIsLoading(false);
+        return;
+      }
+
+      // El server devuelve el usuario (token está en cookie HttpOnly)
+      const user = data.user;
+      localStorage.setItem("auth_user", JSON.stringify(user));
+      console.log(user);
+      router.push(user.role === "admin" ? "/admin" : "/dashboard");
+    } catch (e) {
+      console.error(e);
+      setError("Error inesperado, por favor intenta nuevamente");
     }
-
-    router.push(user.role === "admin" ? "/admin" : "/dashboard");
 
     setIsLoading(false);
   };
