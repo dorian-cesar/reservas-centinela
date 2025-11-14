@@ -36,6 +36,7 @@ function BookingContent() {
   const [userReservedSeat, setUserReservedSeat] = useState<
     string | undefined
   >();
+  const [reservationId, setReservationId] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -115,15 +116,11 @@ function BookingContent() {
         return;
       }
 
-      // Si todo salió bien
       setSelectedSeat(seatNumber);
       setUserReservedSeat(seatNumber);
 
-      // toast({
-      //   title: "Éxito",
-      //   description: `Asiento ${seatNumber} reservado correctamente`,
-      //   variant: "default",
-      // });
+      setReservationId(data.data.reservation._id);
+      localStorage.setItem("reservationId", data.data.reservation._id);
     } catch (error: any) {
       console.error(error);
       toast({
@@ -136,17 +133,44 @@ function BookingContent() {
     }
   };
 
-  // ---------------------------
-  // CONFIRMAR RESERVA (MOCK)
-  // ---------------------------
-  const handleConfirmReservation = () => {
-    if (selectedSeat === null || !userId || !service) return;
+  const handleConfirmReservation = async () => {
+    if (!reservationId) return;
     setIsLoading(true);
+    console.log("ReservationId:", reservationId);
+    try {
+      const res = await fetch("/api/services/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId }),
+      });
 
-    setTimeout(() => {
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast({
+          title: "Error",
+          description: data.message || "No se pudo confirmar la reserva",
+          variant: "destructive",
+        });
+        return;
+      }
+
       setShowConfirmation(true);
+      toast({
+        title: "Éxito",
+        description: "Reserva confirmada correctamente",
+        variant: "default",
+      });
+    } catch (error: any) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo confirmar la reserva",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 600);
+    }
   };
 
   // ---------------------------
