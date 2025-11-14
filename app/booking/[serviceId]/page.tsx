@@ -29,9 +29,12 @@ function BookingContent() {
   const router = useRouter();
   const serviceId = params.serviceId as string;
 
-  const { getServiceById } = useServicesStore();
+  const { selectedService, getServiceById, setSelectedService } =
+    useServicesStore();
 
-  const [service, setService] = useState<ApiBusService | null>(null);
+  const [service, setService] = useState<ApiBusService | null>(
+    selectedService || null
+  );
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [userReservedSeat, setUserReservedSeat] = useState<
     string | undefined
@@ -47,7 +50,13 @@ function BookingContent() {
   // OBTENER SERVICIO DESDE STORE
   // ---------------------------
   useEffect(() => {
-    const srv = getServiceById(serviceId);
+    let srv: ApiBusService | undefined;
+
+    if (selectedService?._id === serviceId) {
+      srv = selectedService;
+    } else {
+      srv = getServiceById(serviceId);
+    }
 
     if (!srv) {
       router.push("/dashboard");
@@ -55,13 +64,20 @@ function BookingContent() {
     }
 
     setService(srv);
+    setSelectedService(srv); // 🔹 actualizar store
 
-    // detectar si el usuario ya tiene asiento reservado
     if (userId) {
       const found = srv.seats.find((s) => s.reservedBy === userId);
       if (found) setUserReservedSeat(found.seatNumber);
     }
-  }, [serviceId, userId, getServiceById, router]);
+  }, [
+    serviceId,
+    selectedService,
+    userId,
+    getServiceById,
+    setSelectedService,
+    router,
+  ]);
 
   // ---------------------------
   // MAPEAR LAYOUT REAL DEL BUS

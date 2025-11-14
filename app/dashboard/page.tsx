@@ -40,6 +40,7 @@ function DashboardContent() {
   const user = getCurrentUser();
 
   const { setServices: setGlobalServices } = useServicesStore();
+  const { setSelectedService } = useServicesStore();
 
   const handleLogout = () => {
     logout();
@@ -53,6 +54,11 @@ function DashboardContent() {
     };
     loadCities();
   }, []);
+
+  const handleSelectService = (service: ApiBusService) => {
+    setSelectedService(service);
+    router.push(`/booking/${service._id}`);
+  };
 
   const loadServices = async () => {
     if (!selectedOrigin || !selectedDestination || !selectedDate) return;
@@ -293,28 +299,13 @@ function DashboardContent() {
                       </div>
                     </div>
                   </div>
-
-                  {/* {reserved ? (
-                    <Button
-                      disabled
-                      size="sm"
-                      className="bg-green-600/20 text-green-400 border border-green-600/50 text-xs w-full sm:w-auto"
-                    >
-                      Ya tienes una reserva
-                    </Button>
-                  ) : ( */}
-                  <Link
-                    href={`/booking/${service._id}`}
-                    className="w-full sm:w-auto"
+                  <Button
+                    size="sm"
+                    className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
+                    onClick={() => handleSelectService(service)}
                   >
-                    <Button
-                      size="sm"
-                      className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
-                    >
-                      Reservar Asiento
-                    </Button>
-                  </Link>
-                  {/* )} */}
+                    Reservar Asiento
+                  </Button>
                 </Card>
               );
             })}
