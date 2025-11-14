@@ -130,7 +130,7 @@ function AdminContent() {
             </div>
 
             <div className="flex items-center gap-2 md:gap-4 self-end sm:self-auto">
-              <Link href="/admin/upload">
+              {/* <Link href="/admin/upload">
                 <Button
                   size="sm"
                   className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white text-xs md:text-sm"
@@ -139,7 +139,7 @@ function AdminContent() {
                   <span className="hidden sm:inline">Cargar Servicios</span>
                   <span className="sm:hidden">Cargar</span>
                 </Button>
-              </Link>
+              </Link> */}
               <Button
                 onClick={handleLogout}
                 variant="outline"

@@ -23,15 +23,15 @@ export default function LoginPage() {
     setError("");
     setIsLoading(true);
 
-    // Simulación de login
-    await new Promise((r) => setTimeout(r, 800)); // breve delay opcional
-    const user = login(email, password);
+    const user = await login(email, password);
 
-    if (user) {
-      router.push(user.role === "admin" ? "/admin" : "/dashboard");
-    } else {
+    if (!user) {
       setError("Credenciales incorrectas");
+      setIsLoading(false);
+      return;
     }
+
+    router.push(user.role === "admin" ? "/admin" : "/dashboard");
 
     setIsLoading(false);
   };
@@ -124,18 +124,6 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-
-          <div className="mt-6 p-4 bg-slate-800/30 rounded-lg border border-slate-700/50">
-            <p className="text-xs text-slate-400 mb-2 font-semibold">
-              Cuentas de prueba:
-            </p>
-            <p className="text-xs text-slate-500">
-              Admin: admin@centinela.cl / admin123
-            </p>
-            <p className="text-xs text-slate-500">
-              Usuario: usuario@centinela.cl / user123
-            </p>
-          </div>
         </div>
       </div>
     </div>

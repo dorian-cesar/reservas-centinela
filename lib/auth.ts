@@ -7,64 +7,64 @@ export interface User {
   role: "user" | "admin";
 }
 
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
+export interface AuthResponse {
+  token: string;
+  user: User;
 }
 
-// Mock users database
-const MOCK_USERS = [
-  {
-    id: "1",
-    email: "admin@centinela.cl",
-    password: "admin123",
-    name: "Administrador",
-    role: "admin" as const,
-  },
-  {
-    id: "2",
-    email: "usuario@centinela.cl",
-    password: "user123",
-    name: "Juan Pérez",
-    role: "user" as const,
-  },
-];
+const API_URL = "https://reserva-centinela.dev-wit.com/api";
 
-export function login(email: string, password: string): User | null {
-  const user = MOCK_USERS.find(
-    (u) => u.email === email && u.password === password
-  );
-  if (user) {
-    const authUser = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    };
-    localStorage.setItem("auth_user", JSON.stringify(authUser));
-    return authUser;
+// ============================
+// LOGIN REAL (usuario + token)
+// ============================
+export async function login(
+  email: string,
+  password: string
+): Promise<User | null> {
+  try {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!res.ok) return null;
+
+    const data: AuthResponse = await res.json();
+
+    // Guarda token y usuario
+    localStorage.setItem("auth_token", data.token);
+    localStorage.setItem("auth_user", JSON.stringify(data.user));
+
+    return data.user;
+  } catch (error) {
+    console.error("Login error:", error);
+    return null;
   }
-  return null;
 }
 
-export function register(email: string, password: string, name: string): User {
-  const newUser = {
-    id: Date.now().toString(),
-    email,
-    name,
-    role: "user" as const,
-  };
-  // In a real app, this would save to database
-  localStorage.setItem("auth_user", JSON.stringify(newUser));
-  return newUser;
-}
-
+// ============================
+// LOGOUT
+// ============================
 export function logout() {
   localStorage.removeItem("auth_user");
+  localStorage.removeItem("auth_token");
 }
 
+// ============================
+// OBTENER USUARIO DESDE LOCAL
+// ============================
 export function getCurrentUser(): User | null {
   if (typeof window === "undefined") return null;
   const userStr = localStorage.getItem("auth_user");
   return userStr ? JSON.parse(userStr) : null;
+}
+
+// ============================
+// OBTENER TOKEN
+// ============================
+export function getToken(): string | null {
+  return typeof window !== "undefined"
+    ? localStorage.getItem("auth_token")
+    : null;
 }
