@@ -4,13 +4,15 @@ import { AuthGuard } from "@/components/auth-guard";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
-import { type ApiBusService } from "@/lib/booking-store";
 import { BusSeatLayout } from "@/components/bus-seat-layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { MapPin, Calendar, Clock, ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+
+import { useServicesStore } from "@/lib/services-store";
+import type { ApiBusService } from "@/lib/booking-types";
 
 export default function BookingPage() {
   return (
@@ -25,85 +27,87 @@ function BookingContent() {
   const router = useRouter();
   const serviceId = params.serviceId as string;
 
-  const [userId] = useState(() => getCurrentUser()?._id);
+  const { getServiceById } = useServicesStore();
 
   const [service, setService] = useState<ApiBusService | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<number | null>(null);
-  const [userReservedSeat, setUserReservedSeat] = useState<number | undefined>(
-    undefined
-  );
+  const [userReservedSeat, setUserReservedSeat] = useState<
+    number | undefined
+  >();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const user = getCurrentUser();
+  const userId = user?._id;
+
+  // ---------------------------
+  // OBTENER SERVICIO DESDE STORE
+  // ---------------------------
   useEffect(() => {
-    console.log("Loading service and checking reservations", {
-      serviceId,
-      userId,
-    });
+    const srv = getServiceById(serviceId);
 
-    const services = getServices();
-    const foundService = services.find((s) => s._id === serviceId);
-
-    if (!foundService) {
-      console.log("Service not found, redirecting to dashboard");
+    if (!srv) {
       router.push("/dashboard");
       return;
     }
 
-    setService(foundService);
+    setService(srv);
 
+    // detectar si el usuario ya tiene asiento reservado
     if (userId) {
-      const userReservations = getUserReservations(userId);
-      const existingReservation = userReservations.find(
-        (r) => r.serviceId === serviceId
-      );
-      if (existingReservation) {
-        console.log("User already has reservation:", existingReservation);
-        setUserReservedSeat(existingReservation.seatNumber);
-      }
+      const found = srv.seats.find((s) => s.reservedBy === userId);
+      if (found) setUserReservedSeat(Number(found.seatNumber));
     }
-  }, [serviceId, userId, router]);
+  }, [serviceId, userId, getServiceById, router]);
 
-  const handleConfirmReservation = () => {
-    console.log("Confirm reservation clicked", {
-      selectedSeat,
-      userId,
-      service: service?._id,
-    });
+  // ---------------------------
+  // MAPEAR LAYOUT REAL DEL BUS
+  // ---------------------------
 
-    if (!selectedSeat && selectedSeat !== 0) {
-      console.log("No seat selected");
-      return;
-    }
+  // Convierte "1"/"0" (string) a 1/0 (number)
+  const mapSeatMap = (seatMap: string[][]) =>
+    seatMap.map(
+      (row) => row.map((s) => (s === "1" ? 1 : 0)) // 1 = asiento, 0 = pasillo
+    );
 
-    if (!userId) {
-      console.log("No user found");
-      return;
-    }
+  // Construye layout REAL combinando seatMap + seats reservados
+  const buildFinalLayout = () => {
+    if (!service) return [];
 
-    if (!service) {
-      console.log("No service found");
-      return;
-    }
+    const piso1 = mapSeatMap(service.busLayout.floor1.seatMap);
 
-    setIsLoading(true);
+    // Asientos reservados (array de números)
+    const reservedNumbers = service.seats
+      .filter((s) => s.reserved)
+      .map((s) => Number(s.seatNumber));
 
-    try {
-      console.log("Creating reservation...");
-      createReservation(userId, service._id, selectedSeat);
-      console.log("Reservation created successfully");
-      setShowConfirmation(true);
-
-      // setTimeout(() => {
-      //   console.log("Redirecting to dashboard");
-      //   router.push("/dashboard");
-      // }, 2000);
-    } catch (error) {
-      console.error("Error creating reservation:", error);
-      setIsLoading(false);
-    }
+    // Marca como "1" los reservados reales
+    return piso1.map((row, rIdx) =>
+      row.map((col, cIdx) => {
+        const seatNumber = rIdx * row.length + cIdx;
+        return reservedNumbers.includes(seatNumber) ? 1 : col;
+      })
+    );
   };
 
+  const finalLayout = buildFinalLayout();
+
+  // ---------------------------
+  // CONFIRMAR RESERVA (MOCK)
+  // ---------------------------
+  const handleConfirmReservation = () => {
+    if (selectedSeat === null || !userId || !service) return;
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setShowConfirmation(true);
+      setIsLoading(false);
+    }, 600);
+  };
+
+  // ---------------------------
+  // LOADING
+  // ---------------------------
   if (!service) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-950">
@@ -112,13 +116,14 @@ function BookingContent() {
     );
   }
 
-  const getRouteDisplay = (route: string) => {
-    return route === "antofagasta" ? "Antofagasta" : "Calama";
-  };
+  // ---------------------------
+  // HELPERS
+  // ---------------------------
+  const getRouteDisplay = (route: string) =>
+    route === "antofagasta" ? "Antofagasta" : "Calama";
 
-  const getDirectionDisplay = (direction: string) => {
-    return direction === "ida" ? "Ida" : "Vuelta";
-  };
+  const getDirectionDisplay = (direction: string) =>
+    direction === "ida" ? "Ida" : "Vuelta";
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -130,87 +135,65 @@ function BookingContent() {
     });
   };
 
-  if (showConfirmation && service) {
-    const user = getCurrentUser();
+  // ---------------------------
+  // CONFIRMATION UI
+  // ---------------------------
+  if (showConfirmation) {
     return (
       <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
         <Card className="bg-slate-900/50 border-green-700/50 p-8 md:p-10 max-w-lg text-center">
-          {/* Ícono de éxito */}
           <div className="mb-6 flex justify-center">
             <div className="bg-green-600 rounded-full p-4 md:p-6 animate-soft-pulse shadow-lg shadow-green-900/50">
               <CheckCircle className="w-12 h-12 md:w-16 md:h-16 text-white" />
             </div>
           </div>
 
-          {/* Título */}
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
             ¡Reserva Confirmada!
           </h2>
-          <p className="text-sm md:text-base text-slate-300 mb-2">
-            Tu asiento ha sido reservado exitosamente.
-          </p>
 
-          {/* Nombre del usuario */}
           <p className="text-base md:text-lg font-semibold text-slate-300 mb-2">
-            {user?.name || ""}
+            {user?.name}
           </p>
 
-          {/* Datos del servicio */}
           <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-6 text-left space-y-3">
             <div>
               <p className="text-xs md:text-sm text-slate-400">Asiento</p>
               <p className="text-xl md:text-2xl font-bold text-green-400">
-                #{selectedSeat !== null ? selectedSeat + 1 : ""}
+                #{selectedSeat! + 1}
               </p>
             </div>
 
             <div>
               <p className="text-xs md:text-sm text-slate-400">Ruta</p>
               <p className="text-base md:text-lg font-semibold text-white">
-                {getRouteDisplay(service.route)} -{" "}
-                {getDirectionDisplay(service.direction)}
+                {getRouteDisplay(service.origin)} -{" "}
+                {getRouteDisplay(service.destination)}
               </p>
             </div>
 
             <div>
               <p className="text-xs md:text-sm text-slate-400">Fecha</p>
-              <p className="text-sm md:text-base font-medium text-slate-200 capitalize">
+              <p className="text-sm md:text-base text-slate-200 capitalize">
                 {formatDate(service.date)}
               </p>
             </div>
-
-            <div className="grid grid-cols-2 gap-3 md:gap-4">
-              <div>
-                <p className="text-xs md:text-sm text-slate-400">
-                  Hora de salida
-                </p>
-                <p className="text-base md:text-lg font-semibold text-orange-400">
-                  {service.departureTime}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs md:text-sm text-slate-400">
-                  Hora de llegada
-                </p>
-                <p className="text-base md:text-lg font-semibold text-blue-400">
-                  {service.arrivalTime}
-                </p>
-              </div>
-            </div>
           </div>
 
-          {/* Botón para volver */}
           <Button
             onClick={() => router.push("/dashboard")}
-            className="mt-8 w-full bg-blue-800 hover:bg-blue-900 text-white font-semibold py-3 rounded-lg transition-all duration-300"
+            className="mt-8 w-full bg-blue-800 hover:bg-blue-900 text-white font-semibold py-3 rounded-lg"
           >
-            Volver al listado de viajes
+            Volver al listado
           </Button>
         </Card>
       </div>
     );
   }
 
+  // ---------------------------
+  // PAGE UI
+  // ---------------------------
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
       <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800">
@@ -219,7 +202,7 @@ function BookingContent() {
             <div className="flex items-center gap-3">
               <Image
                 src="/img/logo-tandem-2026.png"
-                alt="Bus"
+                alt="Logo"
                 width={160}
                 height={40}
                 className="object-contain"
@@ -234,13 +217,13 @@ function BookingContent() {
               </div>
             </div>
 
-            <Link href="/dashboard" className="ml-auto">
+            <Link href="/dashboard">
               <Button
                 variant="outline"
                 size="sm"
-                className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+                className="border-slate-700 text-slate-300 bg-slate-900 hover:bg-slate-800 hover:text-white"
               >
-                <ArrowLeft className="w-3 h-3 md:w-4 md:h-4 mr-2" />
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver
               </Button>
             </Link>
@@ -249,59 +232,50 @@ function BookingContent() {
       </header>
 
       <div className="container mx-auto px-4 py-6 md:py-8">
-        <div className="grid lg:grid-cols-2 gap-6 md:gap-8">
-          {/* Service Info */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* INFO */}
           <div className="order-2 lg:order-1">
-            <Card className="bg-slate-900/50 border-slate-800 p-4 md:p-6 mb-4 md:mb-6">
-              <h2 className="text-xl md:text-2xl font-bold text-white mb-4">
+            <Card className="bg-slate-900/50 border-slate-800 p-6">
+              <h2 className="text-xl font-bold text-white mb-4">
                 Detalles del Servicio
               </h2>
 
-              <div className="space-y-3 md:space-y-4">
+              <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="bg-blue-600/20 p-2 md:p-3 rounded-lg">
-                    <MapPin className="w-5 h-5 md:w-6 md:h-6 text-blue-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs md:text-sm text-slate-400">Destino</p>
-                    <p className="text-base md:text-lg font-bold text-white truncate">
-                      {getRouteDisplay(service.route)} -{" "}
-                      {getDirectionDisplay(service.direction)}
+                  <MapPin className="text-blue-400" />
+                  <div>
+                    <p className="text-xs text-slate-400">Destino</p>
+                    <p className="text-lg text-white">
+                      {service.origin} → {service.destination}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="bg-orange-600/20 p-2 md:p-3 rounded-lg">
-                    <Calendar className="w-5 h-5 md:w-6 md:h-6 text-orange-400" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs md:text-sm text-slate-400">Fecha</p>
-                    <p className="text-sm md:text-lg font-semibold text-white capitalize line-clamp-2">
+                  <Calendar className="text-orange-400" />
+                  <div>
+                    <p className="text-xs text-slate-400">Fecha</p>
+                    <p className="text-lg text-white">
                       {formatDate(service.date)}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="bg-green-600/20 p-2 md:p-3 rounded-lg">
-                    <Clock className="w-5 h-5 md:w-6 md:h-6 text-green-400" />
-                  </div>
+                  <Clock className="text-green-400" />
                   <div>
-                    <p className="text-xs md:text-sm text-slate-400">Horario</p>
-                    <p className="text-base md:text-lg font-semibold text-white">
-                      {service.departureTime} - {service.arrivalTime}
-                    </p>
+                    <p className="text-xs text-slate-400">Horario</p>
+                    <p className="text-lg text-white">{service.time}</p>
                   </div>
                 </div>
               </div>
 
               {selectedSeat !== null && (
-                <div className="mt-4 md:mt-6 p-3 md:p-4 bg-orange-600/20 border-2 border-orange-600/50 rounded-xl">
-                  <p className="text-xs md:text-sm text-orange-300 mb-1">
+                <div className="mt-6 p-4 bg-orange-600/20 border-2 border-orange-600/50 rounded-xl">
+                  <p className="text-sm text-orange-300 mb-1">
                     Asiento Seleccionado
                   </p>
-                  <p className="text-2xl md:text-3xl font-bold text-orange-400">
+                  <p className="text-3xl font-bold text-orange-400">
                     #{selectedSeat + 1}
                   </p>
                 </div>
@@ -312,31 +286,20 @@ function BookingContent() {
               <Button
                 onClick={handleConfirmReservation}
                 disabled={isLoading}
-                className="w-full bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-bold py-4 md:py-6 text-base md:text-lg rounded-xl shadow-lg shadow-orange-900/50 transition-all duration-300 cursor-pointer"
+                className="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-xl"
               >
                 {isLoading ? "Confirmando..." : "Confirmar Reserva"}
               </Button>
             )}
-
-            <div className="mt-4 md:mt-6 p-3 md:p-4 bg-blue-900/20 border border-blue-700/50 rounded-xl">
-              <p className="text-xs md:text-sm text-blue-300 font-semibold mb-2">
-                Información Importante:
-              </p>
-              <ul className="text-xs text-slate-400 space-y-1">
-                <li>• La reserva es válida por 48 horas</li>
-                <li>• Solo puedes reservar un asiento por servicio</li>
-                <li>• El servicio no tiene costo para trabajadores</li>
-                <li>• Debes presentarte 15 minutos antes de la salida</li>
-              </ul>
-            </div>
           </div>
 
+          {/* LAYOUT */}
           <div className="order-1 lg:order-2">
             <BusSeatLayout
-              layout={service.layout}
-              onSeatSelect={setSelectedSeat}
+              layout={finalLayout}
               selectedSeat={selectedSeat}
               userReservedSeat={userReservedSeat}
+              onSeatSelect={setSelectedSeat}
             />
           </div>
         </div>

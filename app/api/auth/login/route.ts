@@ -5,6 +5,7 @@ export async function POST(req: Request) {
 
   const res = await fetch(
     "https://reserva-centinela.dev-wit.com/api/auth/login",
+    // "http://192.168.8.24:4000/api/auth/login",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

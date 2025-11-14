@@ -14,6 +14,7 @@ export async function GET(req: Request) {
 
   const apiRes = await fetch(
     `https://reserva-centinela.dev-wit.com/api/services/search?origin=${origin}&destination=${destination}&date=${date}`,
+    // `http://192.168.8.24:4000/api/services/search?origin=${origin}&destination=${destination}&date=${date}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

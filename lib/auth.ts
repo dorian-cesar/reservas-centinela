@@ -13,6 +13,7 @@ export interface AuthResponse {
 }
 
 const API_URL = "https://reserva-centinela.dev-wit.com/api";
+// const API_URL = "http://192.168.8.24:4000/api";
 
 // ============================
 // LOGIN REAL (usuario + token)

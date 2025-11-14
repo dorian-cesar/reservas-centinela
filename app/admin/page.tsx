@@ -3,7 +3,7 @@
 import { AuthGuard } from "@/components/auth-guard";
 import { useState, useEffect } from "react";
 import { logout } from "@/lib/auth";
-import { type ApiBusService, type Reservation } from "@/lib/booking-store";
+import { type ApiBusService, type Reservation } from "@/lib/booking-types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

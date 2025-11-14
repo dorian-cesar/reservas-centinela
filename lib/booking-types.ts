@@ -53,6 +53,7 @@ export interface ApiBusService {
   _id: string;
   template: ApiTemplate;
   date: string;
+  time: string;
   origin: string;
   destination: string;
   busLayout: ApiBusLayout;

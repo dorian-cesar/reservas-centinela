@@ -3,7 +3,7 @@
 import { AuthGuard } from "@/components/auth-guard";
 import { useState, useEffect } from "react";
 import { getCurrentUser, logout } from "@/lib/auth";
-import { type ApiBusService, type Reservation } from "@/lib/booking-store";
+import { type ApiBusService, type Reservation } from "@/lib/booking-types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -15,6 +15,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import "@/styles/datepicker.css";
 import { es } from "date-fns/locale/es";
 import { fetchCities, type CitiesMap } from "@/lib/cities";
+
+import { useServicesStore } from "@/lib/services-store";
 
 registerLocale("es", es);
 
@@ -36,6 +38,8 @@ function DashboardContent() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const user = getCurrentUser();
+
+  const { setServices: setGlobalServices } = useServicesStore();
 
   const handleLogout = () => {
     logout();
@@ -71,13 +75,18 @@ function DashboardContent() {
       if (!res.ok) {
         console.error(data.error || "Error cargando servicios");
         setServices([]);
+        setGlobalServices([]); // <-- limpiar store
         return;
       }
 
-      setServices(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+
+      setServices(list); // estado local
+      setGlobalServices(list); // <-- GUARDAR EN ZUSTAND
     } catch (err) {
       console.error(err);
       setServices([]);
+      setGlobalServices([]); // <-- limpiar si falla
     } finally {
       setIsLoading(false);
     }

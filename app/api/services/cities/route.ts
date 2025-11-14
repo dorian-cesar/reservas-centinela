@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 const API_URL = "https://reserva-centinela.dev-wit.com/api/cities/map";
+// const API_URL = "http://192.168.8.24:4000/api/cities/map";
 
 // Cache en memoria (por instancia del servidor)
 let cachedCities: any = null;
