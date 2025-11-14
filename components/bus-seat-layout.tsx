@@ -57,16 +57,16 @@ export function BusSeatLayout({
       );
     }
 
-    return "bg-slate-700/30 text-slate-600 border-2 border-slate-700/50 cursor-not-allowed";
+    return "bg-slate-700/30 text-slate-700 border-2 border-slate-700/50 cursor-not-allowed";
   };
 
   return (
     <div className="max-w-md mx-auto">
       {/* Sección del conductor */}
-      <div className="mb-6 md:mb-8 flex items-center justify-between bg-slate-800/50 rounded-t-3xl p-4 md:p-6 border-2 border-slate-700">
+      <div className="mb-3 flex items-center justify-between bg-slate-800/50 rounded-t-3xl p-4 md:p-6 border-2 border-slate-700">
         <div className="flex items-center gap-2 md:gap-3">
-          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center">
-            <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-slate-900 border-2 border-blue-400"></div>
+          <div className="w-5 h-15 md:w-6 md:h-6 rounded-full bg-linear-to-br from-blue-600 to-blue-800 flex items-center justify-center">
+            <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-slate-900 border-2 border-blue-400"></div>
           </div>
           <span className="text-sm md:text-base text-slate-400 font-medium">
             Conductor
