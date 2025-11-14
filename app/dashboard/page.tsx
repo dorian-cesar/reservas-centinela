@@ -202,9 +202,24 @@ function DashboardContent() {
                 Fecha de salida
               </label>
               <DatePicker
-                selected={selectedDate ? new Date(selectedDate) : null}
-                onChange={(date: Date | null) =>
-                  setSelectedDate(date ? date.toISOString().split("T")[0] : "")
+                selected={
+                  selectedDate
+                    ? (() => {
+                        const [y, m, d] = selectedDate.split("-").map(Number);
+                        return new Date(y, m - 1, d); // Fecha local, NO UTC
+                      })()
+                    : null
+                }
+                onChange={(date) =>
+                  setSelectedDate(
+                    date
+                      ? new Intl.DateTimeFormat("en-CA", {
+                          timeZone: "America/Santiago",
+                        })
+                          .format(date)
+                          .replaceAll("/", "-")
+                      : ""
+                  )
                 }
                 locale="es"
                 dateFormat="dd/MM/yyyy"
