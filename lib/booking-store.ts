@@ -1,16 +1,51 @@
 "use client";
 
-export interface BusService {
+// ------------------
+// USER TYPE
+// ------------------
+export interface User {
+  _id: string;
+  name: string;
+  email: string;
+  role: "user" | "admin";
+}
+
+// ------------------
+// REAL API SERVICE (para dashboard y API real)
+// ------------------
+export interface ApiBusService {
+  _id: string;
+  origin: string;
+  destination: string;
+  date: string;
+  template: {
+    time: string;
+  };
+  seats: {
+    number: number;
+    reservedBy: string | null;
+  }[];
+}
+
+// ------------------
+// INTERNAL MOCK TYPE (solo para localStorage)
+// ------------------
+export interface MockBusService {
   id: string;
   route: "antofagasta" | "calama";
   direction: "ida" | "vuelta";
+  date: string;
   departureTime: string;
   arrivalTime: string;
-  date: string;
   busType: string;
-  layout: number[][]; // 0 = available, 1 = reserved, 2 = occupied
+  layout: number[][];
+  reserved: boolean;
+  reservedBy: string | null;
 }
 
+// ------------------
+// RESERVATION
+// ------------------
 export interface Reservation {
   id: string;
   userId: string;
@@ -21,12 +56,15 @@ export interface Reservation {
   status: "active" | "expired" | "confirmed";
 }
 
+// ------------------
+// BUS LAYOUT
+// ------------------
 export interface BusLayout {
   id: string;
   name: string;
   rows: number;
   seatsPerRow: number;
-  layout: number[][]; // Matrix representing seat positions
+  layout: number[][];
 }
 
 const BUS_LAYOUTS: BusLayout[] = [
@@ -37,7 +75,7 @@ const BUS_LAYOUTS: BusLayout[] = [
     seatsPerRow: 4,
     layout: Array(10)
       .fill(0)
-      .map(() => [1, 1, 0, 1, 1]), // 1 = seat, 0 = aisle
+      .map(() => [1, 1, 0, 1, 1]),
   },
   {
     id: "ejecutivo-32",
@@ -50,22 +88,19 @@ const BUS_LAYOUTS: BusLayout[] = [
   },
 ];
 
-// Initialize mock services
-function initializeMockServices(): BusService[] {
-  const services: BusService[] = [];
+// ------------------
+// MOCK SERVICES (se mantienen, pero con el tipo MockBusService)
+// ------------------
+function initializeMockServices(): MockBusService[] {
+  const services: MockBusService[] = [];
   const today = new Date();
 
-  // Generate services for next 14 days
   for (let i = 0; i < 14; i++) {
     const date = new Date(today);
     date.setDate(date.getDate() + i);
     const dateStr = date.toISOString().split("T")[0];
 
-    // Antofagasta - Ida
-    services.push({
-      id: `ant-ida-${dateStr}`,
-      route: "antofagasta",
-      direction: "ida",
+    const base = {
       departureTime: "07:00",
       arrivalTime: "10:30",
       date: dateStr,
@@ -73,44 +108,40 @@ function initializeMockServices(): BusService[] {
       layout: Array(10)
         .fill(0)
         .map(() => [0, 0, 0, 0, 0]),
+      reserved: false,
+      reservedBy: null,
+    };
+
+    services.push({
+      id: `ant-ida-${dateStr}`,
+      route: "antofagasta",
+      direction: "ida",
+      ...base,
     });
 
-    // Antofagasta - Vuelta
     services.push({
       id: `ant-vuelta-${dateStr}`,
       route: "antofagasta",
       direction: "vuelta",
-      departureTime: "18:00",
-      arrivalTime: "21:30",
-      date: dateStr,
-      busType: "standard-40",
-      layout: Array(10)
-        .fill(0)
-        .map(() => [0, 0, 0, 0, 0]),
+      ...base,
     });
 
-    // Calama - Ida
     services.push({
       id: `cal-ida-${dateStr}`,
       route: "calama",
       direction: "ida",
-      departureTime: "08:00",
-      arrivalTime: "10:00",
-      date: dateStr,
+      ...base,
       busType: "ejecutivo-32",
       layout: Array(8)
         .fill(0)
         .map(() => [0, 0, 0, 0, 0]),
     });
 
-    // Calama - Vuelta
     services.push({
       id: `cal-vuelta-${dateStr}`,
       route: "calama",
       direction: "vuelta",
-      departureTime: "17:00",
-      arrivalTime: "19:00",
-      date: dateStr,
+      ...base,
       busType: "ejecutivo-32",
       layout: Array(8)
         .fill(0)
@@ -121,14 +152,39 @@ function initializeMockServices(): BusService[] {
   return services;
 }
 
-export function getServices(): BusService[] {
+// ------------------
+// ADAPTADOR: convierte Mock → ApiBusService
+// ------------------
+function mockToApi(service: MockBusService): ApiBusService {
+  return {
+    _id: service.id,
+    origin: service.route === "antofagasta" ? "Antofagasta" : "Calama",
+    destination: service.route === "antofagasta" ? "Calama" : "Antofagasta",
+    date: service.date,
+    template: { time: service.departureTime },
+    seats: service.layout.flatMap((row, rIdx) =>
+      row.map((seat, cIdx) => ({
+        number: rIdx * 5 + cIdx,
+        reservedBy: seat === 1 ? service.reservedBy : null,
+      }))
+    ),
+  };
+}
+
+// ------------------
+// STORAGE METHODS
+// ------------------
+export function getServices(): ApiBusService[] {
   const stored = localStorage.getItem("bus_services");
+
   if (!stored) {
-    const services = initializeMockServices();
-    localStorage.setItem("bus_services", JSON.stringify(services));
-    return services;
+    const mocks = initializeMockServices();
+    localStorage.setItem("bus_services", JSON.stringify(mocks));
+    return mocks.map(mockToApi);
   }
-  return JSON.parse(stored);
+
+  const mocks: MockBusService[] = JSON.parse(stored);
+  return mocks.map(mockToApi);
 }
 
 export function getReservations(): Reservation[] {
@@ -143,7 +199,7 @@ export function createReservation(
 ): Reservation {
   const reservations = getReservations();
   const now = new Date();
-  const expires = new Date(now.getTime() + 48 * 60 * 60 * 1000); // 48 hours
+  const expires = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
   const reservation: Reservation = {
     id: `${userId}-${serviceId}-${seatNumber}`,
@@ -158,14 +214,21 @@ export function createReservation(
   reservations.push(reservation);
   localStorage.setItem("reservations", JSON.stringify(reservations));
 
-  // Update service layout
-  const services = getServices();
-  const service = services.find((s) => s.id === serviceId);
+  // actualizar mock
+  const stored = localStorage.getItem("bus_services");
+  if (!stored) return reservation;
+
+  const mocks: MockBusService[] = JSON.parse(stored);
+  const service = mocks.find((s) => s.id === serviceId);
+
   if (service) {
-    const row = Math.floor(seatNumber / 4);
-    const col = (seatNumber % 4) + (seatNumber % 4 >= 2 ? 1 : 0); // Account for aisle
+    const row = Math.floor(seatNumber / 5);
+    const col = seatNumber % 5;
     service.layout[row][col] = 1;
-    localStorage.setItem("bus_services", JSON.stringify(services));
+    service.reserved = true;
+    service.reservedBy = userId;
+
+    localStorage.setItem("bus_services", JSON.stringify(mocks));
   }
 
   return reservation;
@@ -179,7 +242,6 @@ export function getUserReservations(userId: string): Reservation[] {
     if (r.userId !== userId) return false;
     if (r.status === "expired") return false;
 
-    // Check if expired
     if (new Date(r.expiresAt) < now) {
       r.status = "expired";
       return false;
@@ -198,16 +260,20 @@ export function cancelReservation(reservationId: string) {
     reservations.splice(index, 1);
     localStorage.setItem("reservations", JSON.stringify(reservations));
 
-    // Update service layout
-    const services = getServices();
-    const service = services.find((s) => s.id === reservation.serviceId);
+    const stored = localStorage.getItem("bus_services");
+    if (!stored) return;
+
+    const mocks: MockBusService[] = JSON.parse(stored);
+    const service = mocks.find((s) => s.id === reservation.serviceId);
+
     if (service) {
-      const row = Math.floor(reservation.seatNumber / 4);
-      const col =
-        (reservation.seatNumber % 4) +
-        (reservation.seatNumber % 4 >= 2 ? 1 : 0);
+      const row = Math.floor(reservation.seatNumber / 5);
+      const col = reservation.seatNumber % 5;
       service.layout[row][col] = 0;
-      localStorage.setItem("bus_services", JSON.stringify(services));
+      service.reserved = false;
+      service.reservedBy = null;
+
+      localStorage.setItem("bus_services", JSON.stringify(mocks));
     }
   }
 }

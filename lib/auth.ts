@@ -1,7 +1,7 @@
 "use client";
 
 export interface User {
-  id: string;
+  _id: string;
   email: string;
   name: string;
   role: "user" | "admin";

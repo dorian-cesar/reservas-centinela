@@ -6,7 +6,7 @@ import { getCurrentUser, logout } from "@/lib/auth";
 import {
   getServices,
   getUserReservations,
-  type BusService,
+  type ApiBusService,
   type Reservation,
 } from "@/lib/booking-store";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,7 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "@/styles/datepicker.css";
 import { es } from "date-fns/locale/es";
+import { fetchCities, type CitiesMap } from "@/lib/cities";
 
 registerLocale("es", es);
 
@@ -31,63 +32,72 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
-  const [services, setServices] = useState<BusService[]>([]);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [selectedRoute, setSelectedRoute] = useState<
-    "all" | "antofagasta" | "calama"
-  >("all");
-  const [selectedDirection, setSelectedDirection] = useState<
-    "all" | "ida" | "vuelta"
-  >("all");
+  const [services, setServices] = useState<ApiBusService[]>([]);
+  const [selectedOrigin, setSelectedOrigin] = useState("");
+  const [selectedDestination, setSelectedDestination] = useState("");
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [citiesMap, setCitiesMap] = useState<CitiesMap>({});
+  const [destinations, setDestinations] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const user = getCurrentUser();
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = () => {
-    const allServices = getServices();
-    const today = new Date();
-    const twoWeeksFromNow = new Date(
-      today.getTime() + 14 * 24 * 60 * 60 * 1000
-    );
-
-    const availableServices = allServices.filter((service) => {
-      const serviceDate = new Date(service.date);
-      return serviceDate >= today && serviceDate <= twoWeeksFromNow;
-    });
-
-    setServices(availableServices);
-
-    if (user) {
-      const userRes = getUserReservations(user.id);
-      setReservations(userRes);
-    }
-  };
 
   const handleLogout = () => {
     logout();
     router.push("/login");
   };
 
-  const filteredServices = services.filter((s) => {
-    const routeMatch = selectedRoute === "all" || s.route === selectedRoute;
-    const directionMatch =
-      selectedDirection === "all" || s.direction === selectedDirection;
-    const dateMatch =
-      !selectedDate ||
-      new Date(s.date).toDateString() === new Date(selectedDate).toDateString();
-    return routeMatch && directionMatch && dateMatch;
-  });
+  useEffect(() => {
+    const loadCities = async () => {
+      const data = await fetchCities();
+      if (data) setCitiesMap(data);
+    };
+    loadCities();
+  }, []);
 
-  const getRouteDisplay = (route: string) =>
-    route === "antofagasta" ? "Antofagasta" : "Calama";
+  const loadServices = async () => {
+    if (!selectedOrigin || !selectedDestination || !selectedDate) return;
 
-  const getDirectionDisplay = (direction: string) =>
-    direction === "ida" ? "Ida" : "Vuelta";
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        origin: selectedOrigin,
+        destination: selectedDestination,
+        date: selectedDate,
+      });
+
+      const res = await fetch(`/api/services/search?${params.toString()}`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error(data.error || "Error cargando servicios");
+        setServices([]);
+        return;
+      }
+
+      setServices(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setServices([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedOrigin || !citiesMap[selectedOrigin]) {
+      setDestinations([]);
+      return;
+    }
+    setDestinations(citiesMap[selectedOrigin]);
+  }, [selectedOrigin, citiesMap]);
+
+  const hasReservationForService = (service: ApiBusService) =>
+    service.seats?.some((s) => s.reservedBy === user?._id);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -98,11 +108,6 @@ function DashboardContent() {
       day: "numeric",
     });
   };
-
-  const hasReservationForService = (serviceId: string) =>
-    reservations.some(
-      (r) => r.serviceId === serviceId && r.status === "active"
-    );
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
@@ -126,7 +131,6 @@ function DashboardContent() {
               </p>
             </div>
           </div>
-
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 text-slate-300">
               <User className="w-4 h-4 md:w-5 md:h-5" />
@@ -148,170 +152,130 @@ function DashboardContent() {
       </header>
 
       <div className="container mx-auto px-4 py-6 md:py-8 space-y-6">
-        {/* FILTROS DE BÚSQUEDA */}
+        {/* FILTROS */}
         <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex flex-col md:flex-row gap-4">
-            {/* SELECT DE CIUDAD */}
+            {/* ORIGEN */}
             <div className="flex flex-col">
-              <label className="text-slate-400 text-xs mb-1">Ciudad</label>
+              <label className="text-slate-400 text-xs mb-1">
+                Ciudad de origen
+              </label>
+              <select
+                value={selectedOrigin}
+                onChange={(e) => setSelectedOrigin(e.target.value)}
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[150px]"
+              >
+                <option value="">Seleccionar</option>
 
-              <div className="relative min-w-[230px]">
-                <select
-                  value={selectedRoute === "all" ? "" : selectedRoute}
-                  onChange={(e) =>
-                    setSelectedRoute(
-                      e.target.value === "" ? "all" : (e.target.value as any)
-                    )
-                  }
-                  className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 w-full focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-                >
-                  <option value="">Todas</option>
-                  <option value="antofagasta">Antofagasta</option>
-                  <option value="calama">Calama</option>
-                </select>
-
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
+                {Object.keys(citiesMap).map((city) => (
+                  <option key={city} value={city}>
+                    {city}
+                  </option>
+                ))}
+              </select>
             </div>
 
-            {/* SELECTOR DE FECHA */}
+            {/* DESTINO */}
+            <div className="flex flex-col">
+              <label className="text-slate-400 text-xs mb-1">
+                Ciudad destino
+              </label>
+              <select
+                value={selectedDestination}
+                onChange={(e) => setSelectedDestination(e.target.value)}
+                disabled={destinations.length === 0}
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[150px]"
+              >
+                <option value="">Seleccionar</option>
+
+                {destinations.map((dest) => (
+                  <option key={dest} value={dest}>
+                    {dest}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* FECHA */}
             <div className="flex flex-col">
               <label className="text-slate-400 text-xs mb-1">
                 Fecha de salida
               </label>
-
-              <div className="relative min-w-[250px]">
-                <DatePicker
-                  selected={selectedDate ? new Date(selectedDate) : null}
-                  onChange={(date: Date | null) =>
-                    setSelectedDate(
-                      date ? date.toISOString().split("T")[0] : ""
-                    )
-                  }
-                  locale="es"
-                  dateFormat="dd/MM/yyyy"
-                  placeholderText="Seleccionar fecha"
-                  className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 pr-10 w-full"
-                  calendarClassName="!bg-slate-900 border border-slate-800 text-white rounded-lg shadow-xl"
-                  dayClassName={() =>
-                    "hover:bg-blue-600/30 text-white transition-colors duration-200 rounded-md"
-                  }
-                />
-
-                {selectedDate && (
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDate("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 transition-colors"
-                    title="Quitar fecha"
-                  >
-                    <X size={16} />
-                  </button>
-                )}
-              </div>
+              <DatePicker
+                selected={selectedDate ? new Date(selectedDate) : null}
+                onChange={(date: Date | null) =>
+                  setSelectedDate(date ? date.toISOString().split("T")[0] : "")
+                }
+                locale="es"
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Seleccionar fecha"
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 min-w-[150px]"
+              />
             </div>
           </div>
 
-          {/* BOTÓN ACTUALIZAR */}
           <Button
-            // onClick={async () => {
-            //   setIsLoading(true);
-            //   await loadData();
-            //   setIsLoading(false);
-            // }}
-            onClick={() => {
-              setIsLoading(true);
-              setTimeout(() => {
-                loadData();
-                setIsLoading(false);
-              }, 600); // pequeño delay visual hasta que exista api real
-            }}
-            disabled={isLoading}
-            className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2
-             ${
-               isLoading
-                 ? "opacity-60 cursor-not-allowed"
-                 : "hover:bg-slate-800"
-             }`}
+            onClick={loadServices}
+            disabled={
+              isLoading ||
+              !selectedOrigin ||
+              !selectedDestination ||
+              !selectedDate
+            }
+            className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
+              isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-slate-800"
+            }`}
           >
             <RotateCw
-              className={`w-4 h-4 ${
-                isLoading ? "animate-spin" : ""
-              } transition-colors duration-300`}
+              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
             />
-            <span>{isLoading ? "Actualizando..." : "Actualizar"}</span>
+            {isLoading ? "Buscando..." : "Buscar"}
           </Button>
         </div>
 
-        {/* SERVICIOS DISPONIBLES */}
+        {/* SERVICIOS */}
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4">
             Servicios Disponibles
           </h2>
           <div className="flex flex-col gap-3">
-            {filteredServices.map((service) => {
-              const hasReservation = hasReservationForService(service.id);
-              const serviceDate = new Date(service.date);
-              const today = new Date();
-              const daysUntilService = Math.floor(
-                (serviceDate.getTime() - today.getTime()) /
-                  (1000 * 60 * 60 * 24)
-              );
-              const canBook = daysUntilService >= 2 && !hasReservation;
+            {services.length === 0 && !isLoading && (
+              <p className="text-slate-400 text-sm">
+                No hay servicios disponibles
+              </p>
+            )}
+
+            {services.map((service) => {
+              const reserved = hasReservationForService(service);
 
               return (
                 <Card
-                  key={service.id}
+                  key={service._id}
                   className="bg-slate-900/60 border-slate-800 p-3 hover:border-blue-700/50 transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-4 w-full"
                 >
-                  {/* Imagen del bus */}
                   <div className="bg-linear-to-br from-blue-900 to-blue-950 p-3 rounded-xl shadow-md shadow-blue-900/50 shrink-0">
                     <Bus className="w-12 h-12 text-white" />
                   </div>
 
-                  {/* Detalles */}
                   <div className="flex-1 text-left">
                     <h3 className="text-base font-bold text-white">
-                      {getRouteDisplay(service.route)}
+                      {service.origin} → {service.destination}
                     </h3>
-                    <span
-                      className={`text-xs font-medium px-2 py-1 rounded ${
-                        service.direction === "ida"
-                          ? "bg-blue-600/20 text-blue-400"
-                          : "bg-orange-600/20 text-orange-400"
-                      }`}
-                    >
-                      {getDirectionDisplay(service.direction)}
-                    </span>
+
                     <div className="mt-2 text-xs text-slate-300 space-y-1">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3 h-3 text-slate-500" />
                         <span>{formatDate(service.date)}</span>
                       </div>
+
                       <div className="flex items-center gap-2">
                         <Clock className="w-3 h-3 text-slate-500" />
-                        <span>
-                          {service.departureTime} - {service.arrivalTime}
-                        </span>
+                        <span>{service.template.time}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Botón */}
-                  {hasReservation ? (
+                  {reserved ? (
                     <Button
                       disabled
                       size="sm"
@@ -319,17 +283,9 @@ function DashboardContent() {
                     >
                       Ya tienes una reserva
                     </Button>
-                  ) : !canBook ? (
-                    <Button
-                      disabled
-                      size="sm"
-                      className="bg-slate-800 text-slate-500 text-xs w-full sm:w-auto"
-                    >
-                      No disponible
-                    </Button>
                   ) : (
                     <Link
-                      href={`/booking/${service.id}`}
+                      href={`/booking/${service._id}`}
                       className="w-full sm:w-auto"
                     >
                       <Button
