@@ -105,6 +105,17 @@ function BookingContent() {
   // Reservar asiento
   const handleSeatSelect = async (seatNumber: string) => {
     if (!userId || !service || isLoading) return;
+
+    if (userReservedSeats.length >= 1) {
+      Swal.fire({
+        icon: "info",
+        title: "Reserva existente",
+        text: "Solo puedes reservar un asiento por servicio.",
+        confirmButtonColor: "#f97316",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -222,9 +233,29 @@ function BookingContent() {
       // Quitar asiento del arreglo
       setUserReservedSeats((prev) => prev.filter((s) => s !== seatNumber));
 
+      // Si el asiento seleccionado era este, limpiarlo
       if (selectedSeat === seatNumber) {
         setSelectedSeat(null);
       }
+
+      // Actualizar frontend
+      setSelectedService((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          seats: prev.seats.map((s) =>
+            s.seatNumber === seatNumber
+              ? {
+                  ...s,
+                  reserved: false,
+                  reservedBy: null,
+                  reservationId: null,
+                }
+              : s
+          ),
+        };
+      });
 
       Swal.fire({
         icon: "success",
@@ -389,7 +420,7 @@ function BookingContent() {
           {/* INFO */}
           <div className="order-2 lg:order-1">
             <Card className="bg-slate-900/50 border-slate-800 p-6">
-              <h2 className="text-xl font-bold text-white mb-4">
+              <h2 className="text-xl font-bold text-white">
                 Detalles del Servicio
               </h2>
 

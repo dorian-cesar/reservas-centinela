@@ -5,7 +5,12 @@ interface ServicesState {
   services: ApiBusService[];
   selectedService: ApiBusService | null;
   setServices: (s: ApiBusService[]) => void;
-  setSelectedService: (service: ApiBusService | null) => void;
+  setSelectedService: (
+    serviceOrFn:
+      | ApiBusService
+      | null
+      | ((prev: ApiBusService | null) => ApiBusService | null)
+  ) => void;
   getServiceById: (id: string) => ApiBusService | undefined;
 }
 
@@ -15,7 +20,14 @@ export const useServicesStore = create<ServicesState>((set, get) => ({
 
   setServices: (s) => set({ services: s }),
 
-  setSelectedService: (service) => set({ selectedService: service }),
+  // ⭐ ahora soporta funciones como setState
+  setSelectedService: (serviceOrFn) =>
+    set((state) => ({
+      selectedService:
+        typeof serviceOrFn === "function"
+          ? serviceOrFn(state.selectedService)
+          : serviceOrFn,
+    })),
 
   getServiceById: (id) => {
     return get().services.find((srv) => srv._id === id);

@@ -17,7 +17,8 @@ export interface ApiSeat {
   seatNumber: string;
   reserved: boolean;
   _id: string;
-  reservedBy?: string;
+  reservedBy: string | null;
+  reservationId: string | null;
 }
 
 export interface ApiBusLayoutFloor {
