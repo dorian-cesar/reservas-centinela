@@ -143,11 +143,11 @@ export function BusSeatLayout({
               "Ocupado",
               "armchair",
             ],
-            [
-              "bg-orange-600 border-orange-400 text-white",
-              "Seleccionado",
-              "armchair",
-            ],
+            // [
+            //   "bg-orange-600 border-orange-400 text-white",
+            //   "Seleccionado",
+            //   "armchair",
+            // ],
             [
               "bg-green-600 border-green-400 text-white",
               "Tu reserva",

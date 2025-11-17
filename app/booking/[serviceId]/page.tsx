@@ -66,6 +66,8 @@ function BookingContent() {
     setService(srv);
     setSelectedService(srv);
 
+    console.log("Servicio seleccionado:", srv);
+
     if (userId) {
       const found = srv.seats.find((s) => s.reservedBy === userId);
       if (found) setUserReservedSeat(found.seatNumber);
@@ -251,8 +253,7 @@ function BookingContent() {
             <div>
               <p className="text-xs md:text-sm text-slate-400">Ruta</p>
               <p className="text-base md:text-lg font-semibold text-white">
-                {getRouteDisplay(service.origin)} -{" "}
-                {getRouteDisplay(service.destination)}
+                {service.origin} - {service.destination}
               </p>
             </div>
 
@@ -349,7 +350,9 @@ function BookingContent() {
                   <Clock className="text-green-400" />
                   <div>
                     <p className="text-xs text-slate-400">Horario</p>
-                    <p className="text-lg text-white">{service.time}</p>
+                    <p className="text-lg text-white">
+                      {service.template.time}
+                    </p>
                   </div>
                 </div>
               </div>
