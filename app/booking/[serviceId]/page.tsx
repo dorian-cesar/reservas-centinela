@@ -204,19 +204,7 @@ function BookingContent() {
 
       // ERROR DEL BACKEND
       if (!res.ok) {
-        let finalMessage =
-          data.error || data.message || "No se pudo desreservar el asiento";
-
-        if (data.timeRemaining || data.cutoffTime) {
-          finalMessage += "\n\n";
-
-          if (data.timeRemaining) {
-            finalMessage += `⏳ Tiempo restante: ${data.timeRemaining}\n`;
-          }
-          if (data.cutoffTime) {
-            finalMessage += `🔒 Restricción: ${data.cutoffTime}`;
-          }
-        }
+        let finalMessage = "No se pudo desreservar el asiento";
 
         Swal.fire({
           icon: "error",
@@ -407,7 +395,9 @@ function BookingContent() {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <MapPin className="text-blue-400" />
+                  <div className="bg-green-700/30 p-3 rounded-xl border border-green-700/40">
+                    <MapPin className="text-green-400 w-6 h-6" />
+                  </div>
                   <div>
                     <p className="text-xs text-slate-400">Destino</p>
                     <p className="text-lg text-white">
@@ -417,7 +407,9 @@ function BookingContent() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Calendar className="text-orange-400" />
+                  <div className="bg-orange-700/20 p-3 rounded-xl border border-orange-600/40">
+                    <Calendar className="text-orange-300 w-6 h-6" />
+                  </div>
                   <div>
                     <p className="text-xs text-slate-400">Fecha</p>
                     <p className="text-lg text-white">
@@ -427,7 +419,9 @@ function BookingContent() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Clock className="text-green-400" />
+                  <div className="bg-purple-700/20 p-3 rounded-xl border border-purple-600/40">
+                    <Clock className="text-purple-300 w-6 h-6" />
+                  </div>
                   <div>
                     <p className="text-xs text-slate-400">Horario</p>
                     <p className="text-lg text-white">

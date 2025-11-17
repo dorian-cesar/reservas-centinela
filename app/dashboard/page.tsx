@@ -298,13 +298,22 @@ function DashboardContent() {
                         <span>{service.template.time}</span>
                       </div>
                     </div>
+
+                    {/* BADGE SI TIENE RESERVA */}
+                    {reserved && (
+                      <div className="mt-2 inline-flex px-3 py-1 bg-green-600/20 border border-green-600 text-green-400 rounded-full text-xs font-medium items-center gap-1">
+                        <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                        Tienes un asiento reservado
+                      </div>
+                    )}
                   </div>
+
                   <Button
                     size="sm"
-                    className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
                     onClick={() => handleSelectService(service)}
+                    className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
                   >
-                    Reservar Asiento
+                    Reservar
                   </Button>
                 </Card>
               );
