@@ -7,7 +7,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { BusSeatLayout } from "@/components/bus-seat-layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import Swal from "sweetalert2";
 import { MapPin, Calendar, Clock, ArrowLeft, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -24,7 +24,6 @@ export default function BookingPage() {
 }
 
 function BookingContent() {
-  const { toast } = useToast();
   const params = useParams();
   const router = useRouter();
   const serviceId = params.serviceId as string;
@@ -81,16 +80,6 @@ function BookingContent() {
     router,
   ]);
 
-  // ---------------------------
-  // MAPEAR LAYOUT REAL DEL BUS
-  // ---------------------------
-
-  // Convierte "1"/"0" (string) a 1/0 (number)
-  const mapSeatMap = (seatMap: string[][]) =>
-    seatMap.map(
-      (row) => row.map((s) => (s === "1" ? 1 : 0)) // 1 = asiento, 0 = pasillo
-    );
-
   // Construye layout REAL combinando seatMap + seats reservados
   const buildFinalLayout = () => {
     if (!service) return [];
@@ -126,10 +115,11 @@ function BookingContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.error || "No se pudo reservar el asiento",
-          variant: "destructive",
+          text: data.error || "No se pudo reservar el asiento",
+          confirmButtonColor: "#dc2626",
         });
         return;
       }
@@ -141,10 +131,11 @@ function BookingContent() {
       localStorage.setItem("reservationId", data.data.reservation._id);
     } catch (error: any) {
       console.error(error);
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "No se pudo reservar el asiento",
-        variant: "destructive",
+        text: error.message || "No se pudo reservar el asiento",
+        confirmButtonColor: "#dc2626",
       });
     } finally {
       setIsLoading(false);
@@ -165,26 +156,23 @@ function BookingContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({
+        Swal.fire({
+          icon: "error",
           title: "Error",
-          description: data.message || "No se pudo confirmar la reserva",
-          variant: "destructive",
+          text: data.message || "No se pudo confirmar la reserva",
+          confirmButtonColor: "#dc2626",
         });
         return;
       }
 
       setShowConfirmation(true);
-      toast({
-        title: "Éxito",
-        description: "Reserva confirmada correctamente",
-        variant: "default",
-      });
     } catch (error: any) {
       console.error(error);
-      toast({
+      Swal.fire({
+        icon: "error",
         title: "Error",
-        description: error.message || "No se pudo confirmar la reserva",
-        variant: "destructive",
+        text: error.message || "No se pudo confirmar la reserva",
+        confirmButtonColor: "#dc2626",
       });
     } finally {
       setIsLoading(false);
@@ -201,15 +189,6 @@ function BookingContent() {
       </div>
     );
   }
-
-  // ---------------------------
-  // HELPERS
-  // ---------------------------
-  const getRouteDisplay = (route: string) =>
-    route === "antofagasta" ? "Antofagasta" : "Calama";
-
-  const getDirectionDisplay = (direction: string) =>
-    direction === "ida" ? "Ida" : "Vuelta";
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
