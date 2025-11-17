@@ -199,6 +199,8 @@ function BookingContent() {
 
     setIsLoading(true);
 
+    const departure = `${service.date}`;
+
     try {
       const res = await fetch("/api/services/unreserve", {
         method: "POST",
@@ -207,41 +209,44 @@ function BookingContent() {
           userId,
           serviceId: service._id,
           seatNumber,
+          serviceDepartureDateTime: departure,
         }),
+      });
+
+      console.log("body unreserve:", {
+        userId,
+        serviceId: service._id,
+        seatNumber,
+        serviceDepartureDateTime: departure,
       });
 
       const data = await res.json();
       console.log("UNRESERVE FRONT RESPONSE:", data);
 
-      // ERROR DEL BACKEND
       if (!res.ok) {
-        let finalMessage = "No se pudo desreservar el asiento";
-
         Swal.fire({
           icon: "error",
           title: "No se puede liberar el asiento",
-          html: finalMessage.replace(/\n/g, "<br>"),
+          text:
+            data.error ||
+            "No se pudo desreservar el asiento. Es posible que falten menos de 48 horas para la salida.",
           confirmButtonColor: "#dc2626",
         });
-
         return;
       }
 
       setReservationId(null);
       localStorage.removeItem("reservationId");
 
-      // Quitar asiento del arreglo
       setUserReservedSeats((prev) => prev.filter((s) => s !== seatNumber));
 
-      // Si el asiento seleccionado era este, limpiarlo
       if (selectedSeat === seatNumber) {
         setSelectedSeat(null);
       }
 
-      // Actualizar frontend
+      // Actualiza store
       setSelectedService((prev) => {
         if (!prev) return prev;
-
         return {
           ...prev,
           seats: prev.seats.map((s) =>
