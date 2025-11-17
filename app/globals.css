@@ -201,7 +201,3 @@ body.swal2-shown::-webkit-scrollbar {
 .swal2-actions button.swal2-cancel:hover {
   background-color: oklch(0.38 0 0) !important;
 }
-
-.swal2-icon {
-  filter: drop-shadow(0 0 8px rgba(255, 125, 0, 0.5));
-}

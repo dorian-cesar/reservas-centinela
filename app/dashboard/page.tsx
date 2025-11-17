@@ -55,9 +55,15 @@ function DashboardContent() {
   }, []);
 
   const loadMyConfirmedServices = async () => {
+    if (!user?._id) {
+      console.error("No hay usuario autenticado");
+      return;
+    }
+
     setIsLoading(true);
+
     try {
-      const res = await fetch(`/api/services/my-confirmed`, {
+      const res = await fetch(`/api/services/my-confirmed?userId=${user._id}`, {
         method: "GET",
         credentials: "include",
       });
@@ -65,14 +71,13 @@ function DashboardContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        console.error(data.error || "Error cargando tus reservas");
+        console.error(data.error || "Error cargando reservas");
         setServices([]);
         setGlobalServices([]);
         return;
       }
 
       const list = Array.isArray(data) ? data : [];
-
       setServices(list);
       setGlobalServices(list);
     } catch (err) {
@@ -291,8 +296,8 @@ function DashboardContent() {
           <Button
             onClick={loadMyConfirmedServices}
             disabled={isLoading}
-            className={`bg-green-600 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
-              isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-green-700"
+            className={`bg-green-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
+              isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-green-800"
             }`}
           >
             <RotateCw
@@ -357,7 +362,7 @@ function DashboardContent() {
                     onClick={() => handleSelectService(service)}
                     className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
                   >
-                    Reservar Asiento
+                    Seleccionar Servicio
                   </Button>
                 </Card>
               );

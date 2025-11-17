@@ -94,7 +94,7 @@ function BookingContent() {
   const buildFinalLayout = () => {
     if (!service) return [];
 
-    const piso1 = service.busLayout.floor1.seatMap; // ya vienen como strings
+    const piso1 = service.busLayout.floor1.seatMap;
 
     const reservedNumbers = service.seats
       .filter((s) => s.reserved)
