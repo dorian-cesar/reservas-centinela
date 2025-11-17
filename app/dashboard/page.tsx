@@ -81,18 +81,18 @@ function DashboardContent() {
       if (!res.ok) {
         console.error(data.error || "Error cargando servicios");
         setServices([]);
-        setGlobalServices([]); // <-- limpiar store
+        setGlobalServices([]);
         return;
       }
 
       const list = Array.isArray(data) ? data : [];
 
-      setServices(list); // estado local
-      setGlobalServices(list); // <-- GUARDAR EN ZUSTAND
+      setServices(list);
+      setGlobalServices(list);
     } catch (err) {
       console.error(err);
       setServices([]);
-      setGlobalServices([]); // <-- limpiar si falla
+      setGlobalServices([]);
     } finally {
       setIsLoading(false);
     }

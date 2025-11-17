@@ -11,7 +11,7 @@ interface ServicesState {
 
 export const useServicesStore = create<ServicesState>((set, get) => ({
   services: [],
-  selectedService: null, // inicial null
+  selectedService: null,
 
   setServices: (s) => set({ services: s }),
 

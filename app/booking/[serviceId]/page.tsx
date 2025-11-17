@@ -64,7 +64,7 @@ function BookingContent() {
     }
 
     setService(srv);
-    setSelectedService(srv); // 🔹 actualizar store
+    setSelectedService(srv);
 
     if (userId) {
       const found = srv.seats.find((s) => s.reservedBy === userId);

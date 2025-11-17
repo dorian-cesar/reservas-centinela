@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useEffect, useState } from "react";
 import { getCurrentUser, type User } from "@/lib/auth";
 import { useRouter } from "next/navigation";
@@ -20,12 +19,12 @@ export function AuthGuard({ children, requireAdmin = false }: AuthGuardProps) {
     const currentUser = getCurrentUser();
 
     if (!currentUser) {
-      router.push("/login");
+      router.replace("/login");
       return;
     }
 
     if (requireAdmin && currentUser.role !== "admin") {
-      router.push("/dashboard");
+      router.replace("/dashboard");
       return;
     }
 
@@ -41,5 +40,5 @@ export function AuthGuard({ children, requireAdmin = false }: AuthGuardProps) {
     );
   }
 
-  return user ? <>{children}</> : null;
+  return <>{user && children}</>;
 }
