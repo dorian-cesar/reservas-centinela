@@ -35,9 +35,7 @@ function BookingContent() {
     selectedService || null
   );
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
-  const [userReservedSeat, setUserReservedSeat] = useState<
-    string | undefined
-  >();
+  const [userReservedSeats, setUserReservedSeats] = useState<string[]>([]);
   const [reservationId, setReservationId] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,8 +66,11 @@ function BookingContent() {
     console.log("Servicio seleccionado:", srv);
 
     if (userId) {
-      const found = srv.seats.find((s) => s.reservedBy === userId);
-      if (found) setUserReservedSeat(found.seatNumber);
+      const foundSeats = srv.seats
+        .filter((s) => s.reservedBy === userId)
+        .map((s) => s.seatNumber);
+
+      setUserReservedSeats(foundSeats);
     }
   }, [
     serviceId,
@@ -80,7 +81,7 @@ function BookingContent() {
     router,
   ]);
 
-  // Construye layout REAL combinando seatMap + seats reservados
+  // Construye layout
   const buildFinalLayout = () => {
     if (!service) return [];
 
@@ -101,6 +102,7 @@ function BookingContent() {
 
   const finalLayout = buildFinalLayout();
 
+  // Reservar asiento
   const handleSeatSelect = async (seatNumber: string) => {
     if (!userId || !service || isLoading) return;
     setIsLoading(true);
@@ -125,7 +127,7 @@ function BookingContent() {
       }
 
       setSelectedSeat(seatNumber);
-      setUserReservedSeat(seatNumber);
+      setUserReservedSeats((prev) => [...prev, seatNumber]);
 
       setReservationId(data.data.reservation._id);
       localStorage.setItem("reservationId", data.data.reservation._id);
@@ -142,6 +144,7 @@ function BookingContent() {
     }
   };
 
+  // Confirmar reserva
   const handleConfirmReservation = async () => {
     if (!reservationId) return;
     setIsLoading(true);
@@ -179,6 +182,73 @@ function BookingContent() {
     }
   };
 
+  // Desreservar asiento
+  const handleUnreserve = async (seatNumber: string) => {
+    if (!userId || !service || isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/services/unreserve", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          serviceId: service._id,
+          seatNumber,
+        }),
+      });
+
+      const data = await res.json();
+      console.log("UNRESERVE FRONT RESPONSE:", data);
+
+      // ERROR DEL BACKEND
+      if (!res.ok) {
+        let finalMessage =
+          data.error || data.message || "No se pudo desreservar el asiento";
+
+        if (data.timeRemaining || data.cutoffTime) {
+          finalMessage += "\n\n";
+
+          if (data.timeRemaining) {
+            finalMessage += `⏳ Tiempo restante: ${data.timeRemaining}\n`;
+          }
+          if (data.cutoffTime) {
+            finalMessage += `🔒 Restricción: ${data.cutoffTime}`;
+          }
+        }
+
+        Swal.fire({
+          icon: "error",
+          title: "No se puede liberar el asiento",
+          html: finalMessage.replace(/\n/g, "<br>"),
+          confirmButtonColor: "#dc2626",
+        });
+
+        return;
+      }
+
+      setReservationId(null);
+      localStorage.removeItem("reservationId");
+
+      // Quitar asiento del arreglo
+      setUserReservedSeats((prev) => prev.filter((s) => s !== seatNumber));
+
+      if (selectedSeat === seatNumber) {
+        setSelectedSeat(null);
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Reserva cancelada",
+        text: "El asiento ha vuelto a quedar disponible",
+        confirmButtonColor: "#22c55e",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // ---------------------------
   // LOADING
   // ---------------------------
@@ -206,47 +276,78 @@ function BookingContent() {
   if (showConfirmation) {
     return (
       <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center p-4">
-        <Card className="bg-slate-900/50 border-green-700/50 p-8 md:p-10 max-w-lg text-center">
-          <div className="mb-6 flex justify-center">
-            <div className="bg-green-600 rounded-full p-4 md:p-6 animate-soft-pulse shadow-lg shadow-green-900/50">
-              <CheckCircle className="w-12 h-12 md:w-16 md:h-16 text-white" />
+        <Card className="bg-slate-900/60 backdrop-blur-xl border border-green-700/50 p-8 md:p-10 max-w-lg w-full text-center rounded-2xl shadow-xl shadow-black/40">
+          <div className="mb-2 flex justify-center">
+            <div className="bg-green-600 rounded-full p-5 md:p-6 animate-soft-pulse shadow-lg shadow-green-900/70">
+              <CheckCircle className="w-14 h-14 md:w-16 md:h-16 text-white" />
             </div>
           </div>
 
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
             ¡Reserva Confirmada!
           </h2>
 
-          <p className="text-base md:text-lg font-semibold text-slate-300 mb-2">
-            {user?.name}
+          <p className="text-base md:text-lg text-slate-300 mb-2">
+            Gracias por reservar con nosotros, <b>{user?.name}</b>.
           </p>
 
-          <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-6 text-left space-y-3">
-            <div>
-              <p className="text-xs md:text-sm text-slate-400">Asiento</p>
-              <p className="text-xl md:text-2xl font-bold text-green-400">
-                #{selectedSeat}
-              </p>
+          <div className="bg-slate-800/40 border border-slate-700/60 rounded-xl p-5 md:p-6 space-y-5 text-left">
+            {/* Asiento */}
+            <div className="flex items-center gap-3">
+              <div className="bg-green-700/30 p-3 rounded-xl border border-green-700/40">
+                <MapPin className="text-green-400 w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">Asiento asignado</p>
+                <p className="text-2xl font-bold text-green-400">
+                  #{selectedSeat}
+                </p>
+              </div>
             </div>
 
-            <div>
-              <p className="text-xs md:text-sm text-slate-400">Ruta</p>
-              <p className="text-base md:text-lg font-semibold text-white">
-                {service.origin} - {service.destination}
-              </p>
+            {/* Ruta */}
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-700/20 p-3 rounded-xl border border-blue-700/40">
+                <MapPin className="text-blue-300 w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">Ruta</p>
+                <p className="text-lg font-semibold text-white">
+                  {service.origin} → {service.destination}
+                </p>
+              </div>
             </div>
 
-            <div>
-              <p className="text-xs md:text-sm text-slate-400">Fecha</p>
-              <p className="text-sm md:text-base text-slate-200 capitalize">
-                {formatDate(service.date)}
-              </p>
+            {/* Fecha */}
+            <div className="flex items-center gap-3">
+              <div className="bg-orange-700/20 p-3 rounded-xl border border-orange-600/40">
+                <Calendar className="text-orange-300 w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">Fecha</p>
+                <p className="text-base text-slate-200 capitalize">
+                  {formatDate(service.date)}
+                </p>
+              </div>
+            </div>
+
+            {/* Hora */}
+            <div className="flex items-center gap-3">
+              <div className="bg-purple-700/20 p-3 rounded-xl border border-purple-600/40">
+                <Clock className="text-purple-300 w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs text-slate-400">Hora de salida</p>
+                <p className="text-lg text-slate-200">
+                  {service?.template?.time}
+                </p>
+              </div>
             </div>
           </div>
 
           <Button
             onClick={() => router.push("/dashboard")}
-            className="mt-8 w-full bg-blue-800 hover:bg-blue-900 text-white font-semibold py-3 rounded-lg"
+            className="mt-2 w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 rounded-xl shadow-lg shadow-green-900/40"
           >
             Volver al listado
           </Button>
@@ -364,9 +465,15 @@ function BookingContent() {
             <BusSeatLayout
               layout={finalLayout}
               selectedSeat={selectedSeat}
-              userReservedSeat={userReservedSeat}
+              userReservedSeats={userReservedSeats}
               onSeatSelect={(seatNumber) => {
                 if (isLoading) return;
+
+                if (userReservedSeats.includes(seatNumber)) {
+                  handleUnreserve(seatNumber);
+                  return;
+                }
+
                 handleSeatSelect(seatNumber);
               }}
               seats={service.seats}

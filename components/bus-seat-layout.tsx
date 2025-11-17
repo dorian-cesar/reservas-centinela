@@ -10,7 +10,7 @@ interface BusSeatLayoutProps {
   seats: ApiSeat[];
   onSeatSelect: (seatNumber: string) => void;
   selectedSeat: string | null;
-  userReservedSeat?: string;
+  userReservedSeats?: string[];
 }
 
 export function BusSeatLayout({
@@ -18,14 +18,17 @@ export function BusSeatLayout({
   seats,
   onSeatSelect,
   selectedSeat,
-  userReservedSeat,
+  userReservedSeats,
 }: BusSeatLayoutProps) {
   const [hoveredSeat, setHoveredSeat] = useState<string | null>(null);
 
   const getSeatStatus = (seatValue: string) => {
     if (!seatValue) return "aisle";
     if (seatValue === "WC") return "wc";
-    if (seatValue === userReservedSeat) return "user-reserved";
+
+    if (userReservedSeats?.includes(seatValue)) {
+      return "user-reserved";
+    }
 
     const seat = seats.find((s) => s.seatNumber === seatValue);
     if (seat?.reserved) return "reserved";
@@ -40,23 +43,36 @@ export function BusSeatLayout({
     switch (status) {
       case "aisle":
         return "bg-transparent";
+
       case "wc":
         return cn(
           "bg-blue-500/40 text-white border-2 border-blue-400/40 cursor-not-allowed",
           "flex flex-col items-center justify-center w-11 h-11 md:w-14 md:h-14 rounded-xl"
         );
+
       case "user-reserved":
-        return "bg-green-600 text-white border-2 border-green-400 cursor-not-allowed shadow-lg shadow-green-900/50";
+        return cn(
+          "bg-green-600 text-white border-2 border-green-400 shadow-lg shadow-green-900/50",
+          "cursor-pointer transition-all duration-300 relative overflow-hidden",
+          // hover
+          "hover:bg-green-700 hover:border-green-500 hover:scale-105 hover:shadow-xl hover:shadow-green-900/70",
+          isSelected &&
+            "bg-green-600 border-green-400 text-white scale-110 shadow-lg shadow-green-900/50",
+          isHovered && !isSelected && "scale-105"
+        );
+
       case "available":
         return cn(
           "bg-slate-800 text-slate-400 border-2 border-slate-700 cursor-pointer transition-all duration-300 relative overflow-hidden",
           "hover:bg-blue-700 hover:border-blue-500 hover:text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-900/50",
           isSelected &&
-            "bg-orange-600 border-orange-400 text-white scale-110 shadow-lg shadow-orange-900/50",
+            "bg-green-600 text-white border-2 border-green-400 shadow-lg shadow-green-900/50",
           isHovered && !isSelected && "scale-105"
         );
+
       case "reserved":
         return "bg-slate-900/50 text-slate-700 border-2 border-slate-800 cursor-not-allowed shadow-inner";
+
       default:
         return "bg-slate-700/30 text-slate-600 border-2 border-slate-700/50 cursor-not-allowed";
     }
@@ -111,7 +127,7 @@ export function BusSeatLayout({
                     onClick={() => onSeatSelect(seatValue)}
                     onMouseEnter={() => setHoveredSeat(seatValue)}
                     onMouseLeave={() => setHoveredSeat(null)}
-                    disabled={status !== "available"}
+                    disabled={status === "reserved"}
                     className={cn(
                       "w-11 h-11 md:w-14 md:h-14 rounded-xl flex flex-col items-center justify-center gap-0.5 font-bold text-xs relative select-none",
                       getSeatClasses(status, seatValue)
