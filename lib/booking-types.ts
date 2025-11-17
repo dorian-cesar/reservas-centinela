@@ -15,6 +15,7 @@ export interface User {
 // ------------------
 export interface ApiSeat {
   seatNumber: string;
+  confirmed: boolean;
   reserved: boolean;
   _id: string;
   reservedBy: string | null;

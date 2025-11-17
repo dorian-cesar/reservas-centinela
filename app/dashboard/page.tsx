@@ -106,7 +106,9 @@ function DashboardContent() {
   }, [selectedOrigin, citiesMap]);
 
   const hasReservationForService = (service: ApiBusService) =>
-    service.seats?.some((s) => s.reservedBy === user?._id);
+    service.seats?.some(
+      (s) => s.reservedBy === user?._id && s.confirmed === true
+    );
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
