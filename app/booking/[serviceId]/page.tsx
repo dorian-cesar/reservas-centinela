@@ -23,6 +23,15 @@ export default function BookingPage() {
   );
 }
 
+export const AppSwal = Swal.mixin({
+  customClass: {
+    popup: "swal2-popup",
+    confirmButton: "swal2-confirm",
+    cancelButton: "swal2-cancel",
+  },
+  buttonsStyling: false,
+});
+
 function BookingContent() {
   const params = useParams();
   const router = useRouter();
@@ -107,7 +116,7 @@ function BookingContent() {
     if (!userId || !service || isLoading) return;
 
     if (userReservedSeats.length >= 1) {
-      Swal.fire({
+      AppSwal.fire({
         icon: "info",
         title: "Reserva existente",
         text: "Solo puedes reservar un asiento por servicio.",
@@ -128,7 +137,7 @@ function BookingContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        Swal.fire({
+        AppSwal.fire({
           icon: "error",
           title: "Error",
           text: data.error || "No se pudo reservar el asiento",
@@ -144,7 +153,7 @@ function BookingContent() {
       localStorage.setItem("reservationId", data.data.reservation._id);
     } catch (error: any) {
       console.error(error);
-      Swal.fire({
+      AppSwal.fire({
         icon: "error",
         title: "Error",
         text: error.message || "No se pudo reservar el asiento",
@@ -170,7 +179,7 @@ function BookingContent() {
       const data = await res.json();
 
       if (!res.ok) {
-        Swal.fire({
+        AppSwal.fire({
           icon: "error",
           title: "Error",
           text: data.message || "No se pudo confirmar la reserva",
@@ -182,7 +191,7 @@ function BookingContent() {
       setShowConfirmation(true);
     } catch (error: any) {
       console.error(error);
-      Swal.fire({
+      AppSwal.fire({
         icon: "error",
         title: "Error",
         text: error.message || "No se pudo confirmar la reserva",
@@ -224,7 +233,7 @@ function BookingContent() {
       console.log("UNRESERVE FRONT RESPONSE:", data);
 
       if (!res.ok) {
-        Swal.fire({
+        AppSwal.fire({
           icon: "error",
           title: "No se puede liberar el asiento",
           text:
@@ -262,7 +271,7 @@ function BookingContent() {
         };
       });
 
-      Swal.fire({
+      AppSwal.fire({
         icon: "success",
         title: "Reserva cancelada",
         text: "El asiento ha vuelto a quedar disponible",
