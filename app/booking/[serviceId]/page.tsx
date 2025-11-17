@@ -208,7 +208,7 @@ function BookingContent() {
 
     setIsLoading(true);
 
-    const departure = `${service.date}`;
+    const departure = service.date;
 
     try {
       const res = await fetch("/api/services/unreserve", {
