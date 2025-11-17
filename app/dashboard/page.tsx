@@ -54,6 +54,36 @@ function DashboardContent() {
     loadCities();
   }, []);
 
+  const loadMyConfirmedServices = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/services/my-confirmed`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error(data.error || "Error cargando tus reservas");
+        setServices([]);
+        setGlobalServices([]);
+        return;
+      }
+
+      const list = Array.isArray(data) ? data : [];
+
+      setServices(list);
+      setGlobalServices(list);
+    } catch (err) {
+      console.error(err);
+      setServices([]);
+      setGlobalServices([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSelectService = (service: ApiBusService) => {
     setSelectedService(service);
     router.push(`/booking/${service._id}`);
@@ -194,11 +224,11 @@ function DashboardContent() {
               <select
                 value={selectedDestination}
                 onChange={(e) => setSelectedDestination(e.target.value)}
-                disabled={destinations.length === 0}
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[300px]"
+                disabled={!selectedOrigin || destinations.length === 0}
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[300px]
+             disabled:bg-slate-700 disabled:text-slate-400"
               >
                 <option value="">Seleccionar</option>
-
                 {destinations.map((dest) => (
                   <option key={dest} value={dest}>
                     {dest}
@@ -257,6 +287,19 @@ function DashboardContent() {
             />
             {isLoading ? "Buscando..." : "Buscar"}
           </Button>
+
+          <Button
+            onClick={loadMyConfirmedServices}
+            disabled={isLoading}
+            className={`bg-green-600 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
+              isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-green-700"
+            }`}
+          >
+            <RotateCw
+              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+            />
+            Mis asientos confirmados
+          </Button>
         </div>
 
         {/* SERVICIOS */}
@@ -314,7 +357,7 @@ function DashboardContent() {
                     onClick={() => handleSelectService(service)}
                     className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
                   >
-                    Reservar
+                    Reservar Asiento
                   </Button>
                 </Card>
               );
