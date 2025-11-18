@@ -273,25 +273,26 @@ function DashboardContent() {
                 className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 w-full"
               />
             </div>
+            <Button
+              onClick={loadServices}
+              disabled={
+                isLoading ||
+                !selectedOrigin ||
+                !selectedDestination ||
+                !selectedDate
+              }
+              className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
+                isLoading
+                  ? "opacity-60 cursor-not-allowed"
+                  : "hover:bg-slate-800"
+              }`}
+            >
+              <RotateCw
+                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+              />
+              {isLoading ? "Buscando..." : "Buscar"}
+            </Button>
           </div>
-
-          <Button
-            onClick={loadServices}
-            disabled={
-              isLoading ||
-              !selectedOrigin ||
-              !selectedDestination ||
-              !selectedDate
-            }
-            className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
-              isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-slate-800"
-            }`}
-          >
-            <RotateCw
-              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
-            />
-            {isLoading ? "Buscando..." : "Buscar"}
-          </Button>
 
           <Button
             onClick={loadMyConfirmedServices}
