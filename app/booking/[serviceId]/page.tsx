@@ -380,7 +380,7 @@ function BookingContent() {
 
           <Button
             onClick={() => router.push("/dashboard")}
-            className="mt-2 w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 rounded-xl shadow-lg shadow-green-900/40"
+            className="mt-2 w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-3 rounded-xl shadow-lg shadow-green-900/40 cursor-pointer"
           >
             Volver al listado
           </Button>
@@ -394,7 +394,7 @@ function BookingContent() {
   // ---------------------------
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
-      <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800">
+      <header className="bg-slate-800/50 backdrop-blur-xl border-b border-slate-700">
         <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
@@ -419,7 +419,7 @@ function BookingContent() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-slate-700 text-slate-300 bg-slate-900 hover:bg-slate-800 hover:text-white"
+                className="border-slate-700 text-slate-300 bg-slate-900 hover:bg-slate-800 hover:text-white cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Volver
@@ -492,7 +492,7 @@ function BookingContent() {
               <Button
                 onClick={handleConfirmReservation}
                 disabled={isLoading}
-                className="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-xl"
+                className="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-xl cursor-pointer"
               >
                 {isLoading ? "Confirmando..." : "Confirmar Reserva"}
               </Button>

@@ -46,3 +46,13 @@
 .react-datepicker__triangle {
   display: none; /* oculta el triángulo feo */
 }
+
+/* DÍAS DESHABILITADOS (antes de hoy) */
+.react-datepicker__day--disabled {
+  color: #475569 !important; /* slate-600 */
+  opacity: 0.5;
+}
+
+.react-datepicker__day--disabled:hover {
+  background-color: transparent !important; /* No hover */
+}

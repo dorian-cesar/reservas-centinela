@@ -147,18 +147,39 @@ function DashboardContent() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("es-CL", {
+    const raw = date.toLocaleDateString("es-CL", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
+    return raw
+      .toLowerCase()
+      .split(" ")
+      .map((word) => {
+        if (word === "de") return "de";
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(" ");
   };
+
+  const formatName = (name: string) =>
+    name
+      .toLowerCase()
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
+
+  const todayChile = new Date(
+    new Intl.DateTimeFormat("en-CL", {
+      timeZone: "America/Santiago",
+    }).format(new Date())
+  );
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
       {/* HEADER */}
-      <header className="bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 sticky top-0 z-50">
+      <header className="bg-slate-800/50 backdrop-blur-xl border-b border-slate-700 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3 md:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <Image
@@ -181,14 +202,14 @@ function DashboardContent() {
             <div className="flex items-center gap-2 text-slate-300">
               <User className="w-4 h-4 md:w-5 md:h-5" />
               <span className="text-xs md:text-sm font-medium">
-                {user?.name}
+                {user?.name ? formatName(user.name) : ""}
               </span>
             </div>
             <Button
               onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent cursor-pointer"
             >
               <LogOut className="w-3 h-3 md:w-4 md:h-4 md:mr-2" />
               <span className="hidden md:inline">Salir</span>
@@ -270,6 +291,7 @@ function DashboardContent() {
                 locale="es"
                 dateFormat="dd/MM/yyyy"
                 placeholderText="Seleccionar fecha"
+                minDate={todayChile}
                 className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 w-full"
               />
             </div>
@@ -281,7 +303,7 @@ function DashboardContent() {
                 !selectedDestination ||
                 !selectedDate
               }
-              className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
+              className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer ${
                 isLoading
                   ? "opacity-60 cursor-not-allowed"
                   : "hover:bg-slate-800"
@@ -297,7 +319,7 @@ function DashboardContent() {
           <Button
             onClick={loadMyConfirmedServices}
             disabled={isLoading}
-            className={`bg-green-800 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
+            className={`bg-green-800 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer ${
               isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-green-900"
             }`}
           >
@@ -331,39 +353,44 @@ function DashboardContent() {
                   <img
                     src="/favicon.ico"
                     alt="Logo Tandem"
-                    className="w-12 h-12 object-contain sm:mb-6"
+                    className="w-12 h-12 object-contain"
                   />
 
-                  <div className="flex-1 text-left">
-                    <h3 className="text-base font-bold text-white">
-                      {service.origin} → {service.destination}
-                    </h3>
+                  <div className="flex-1">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                      {/* TITULO + DETALLES */}
+                      <div className="text-left">
+                        <h3 className="text-base font-bold text-white">
+                          {service.origin} → {service.destination}
+                        </h3>
 
-                    <div className="mt-2 text-xs text-slate-300 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-3 h-3 text-slate-500" />
-                        <span>{formatDate(service.date)}</span>
+                        <div className="mt-2 text-xs text-slate-300 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-3 h-3 text-slate-500" />
+                            <span>{formatDate(service.date)}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-3 h-3 text-slate-500" />
+                            <span>{service.template.time}</span>
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <Clock className="w-3 h-3 text-slate-500" />
-                        <span>{service.template.time}</span>
-                      </div>
+                      {/* BADGE */}
+                      {reserved && (
+                        <div className="mt-2 inline-flex px-3 py-1 bg-green-600/20 border border-green-600 text-green-400 rounded-full text-xs font-medium items-center gap-1 w-fit lg:mt-0">
+                          <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                          Tienes un asiento reservado
+                        </div>
+                      )}
                     </div>
-
-                    {/* BADGE SI TIENE RESERVA */}
-                    {reserved && (
-                      <div className="mt-2 inline-flex px-3 py-1 bg-green-600/20 border border-green-600 text-green-400 rounded-full text-xs font-medium items-center gap-1">
-                        <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                        Tienes un asiento reservado
-                      </div>
-                    )}
                   </div>
 
                   <Button
                     size="sm"
                     onClick={() => handleSelectService(service)}
-                    className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto"
+                    className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto cursor-pointer"
                   >
                     Seleccionar Servicio
                   </Button>
