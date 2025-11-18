@@ -11,7 +11,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
     }
 
-    // Llamada a la API externa
     const res = await fetch(API_URL + "/reservations/reserve", {
       method: "POST",
       headers: {

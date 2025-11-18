@@ -20,7 +20,6 @@ export const useServicesStore = create<ServicesState>((set, get) => ({
 
   setServices: (s) => set({ services: s }),
 
-  // ⭐ ahora soporta funciones como setState
   setSelectedService: (serviceOrFn) =>
     set((state) => ({
       selectedService:

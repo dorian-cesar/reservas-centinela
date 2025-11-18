@@ -178,24 +178,39 @@ body.swal2-shown::-webkit-scrollbar {
 }
 
 .swal2-actions button.swal2-confirm {
-  background-color: oklch(0.65 0.19 56) !important; /* tu naranja */
+  background: linear-gradient(
+    180deg,
+    oklch(0.68 0.19 56) 0%,
+    oklch(54.747% 0.15055 47.355) 100%
+  ) !important;
   border-radius: 0.75rem !important;
-  padding: 0.8rem 1.8rem !important;
+  padding: 0.5rem 3rem !important;
   color: white !important;
-  border: none;
+  font-weight: 600 !important;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(255, 125, 0, 0.25) !important;
+  border: 2px solid oklch(71.38% 0.19126 45.862) !important;
 }
 
 .swal2-actions button.swal2-confirm:hover {
-  background-color: oklch(0.62 0.19 56) !important;
+  box-shadow: 0 4px 10px rgba(255, 125, 0, 0.35) !important;
+  background: oklch(0.62 0.19 56) !important;
+  border-color: oklch(71.38% 0.19126 45.862) !important;
 }
 
+.swal2-actions button.swal2-confirm:active {
+  transform: translateY(1px);
+  background: oklch(0.58 0.19 56) !important;
+}
+
+/* === CANCEL BUTTON === */
 .swal2-actions button.swal2-cancel {
   background-color: oklch(0.32 0 0) !important;
   color: oklch(0.95 0 0) !important;
   border-radius: 0.75rem !important;
   padding: 0.8rem 1.8rem !important;
-  border: 1px solid oklch(0.45 0 0);
+  border: 1px solid oklch(0.45 0 0) !important;
+  transition: all 0.15s ease-out !important;
 }
 
 .swal2-actions button.swal2-cancel:hover {

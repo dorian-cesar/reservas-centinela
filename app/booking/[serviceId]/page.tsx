@@ -26,8 +26,8 @@ export default function BookingPage() {
 export const AppSwal = Swal.mixin({
   customClass: {
     popup: "swal2-popup",
-    confirmButton: "swal2-confirm",
-    cancelButton: "swal2-cancel",
+    confirmButton: "app-confirm-btn",
+    cancelButton: "app-cancel-btn",
   },
   buttonsStyling: false,
 });
@@ -234,11 +234,9 @@ function BookingContent() {
 
       if (!res.ok) {
         AppSwal.fire({
-          icon: "error",
+          icon: "info",
           title: "No se puede liberar el asiento",
-          text:
-            data.error ||
-            "No se pudo desreservar el asiento. Es posible que falten menos de 48 horas para la salida.",
+          text: "No se pudo desreservar el asiento. Es posible que falten menos de 48 horas para la salida.",
           confirmButtonColor: "#dc2626",
         });
         return;
