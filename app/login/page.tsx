@@ -38,7 +38,6 @@ export default function LoginPage() {
         return;
       }
 
-      // El server devuelve el usuario (token está en cookie HttpOnly)
       const user = data.user;
       localStorage.setItem("auth_user", JSON.stringify(user));
       console.log(user);

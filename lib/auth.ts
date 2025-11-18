@@ -12,8 +12,7 @@ export interface AuthResponse {
   user: User;
 }
 
-const API_URL = "https://reserva-centinela.dev-wit.com/api";
-// const API_URL = "http://192.168.8.24:4000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // ============================
 // LOGIN REAL (usuario + token)
@@ -33,7 +32,6 @@ export async function login(
 
     const data: AuthResponse = await res.json();
 
-    // Guarda token y usuario
     localStorage.setItem("auth_token", data.token);
     localStorage.setItem("auth_user", JSON.stringify(data.user));
 

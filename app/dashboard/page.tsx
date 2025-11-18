@@ -372,7 +372,7 @@ function DashboardContent() {
 
                           <div className="flex items-center gap-2">
                             <Clock className="w-3 h-3 text-slate-500" />
-                            <span>{service.template.time}</span>
+                            <span>{service.template.time} hrs</span>
                           </div>
                         </div>
                       </div>
