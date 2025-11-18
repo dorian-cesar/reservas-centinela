@@ -326,11 +326,13 @@ function DashboardContent() {
               return (
                 <Card
                   key={service._id}
-                  className="bg-slate-900/60 border-slate-800 p-3 hover:border-blue-700/50 transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-4 w-full"
+                  className="bg-slate-900/60 border-blue-700/50 p-3 hover:border-blue-700 transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-4 w-full"
                 >
-                  <div className="bg-linear-to-br from-blue-900 to-blue-950 p-3 rounded-xl shadow-md shadow-blue-900/50 shrink-0">
-                    <Bus className="w-12 h-12 text-white" />
-                  </div>
+                  <img
+                    src="/favicon.ico"
+                    alt="Logo Tandem"
+                    className="w-12 h-12 object-contain sm:mb-6"
+                  />
 
                   <div className="flex-1 text-left">
                     <h3 className="text-base font-bold text-white">
