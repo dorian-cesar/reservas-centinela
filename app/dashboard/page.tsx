@@ -297,14 +297,14 @@ function DashboardContent() {
           <Button
             onClick={loadMyConfirmedServices}
             disabled={isLoading}
-            className={`bg-green-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
-              isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-green-800"
+            className={`bg-green-800 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 ${
+              isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-green-900"
             }`}
           >
             <RotateCw
               className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
             />
-            Mis asientos confirmados
+            Mis asientos reservados
           </Button>
         </div>
 
