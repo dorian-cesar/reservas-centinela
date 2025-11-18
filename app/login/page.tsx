@@ -138,6 +138,28 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
+          <div className="mt-6 text-slate-400 text-sm border-t border-slate-800 pt-6">
+            <h3 className="font-semibold text-slate-300 mb-2 text-center">
+              Ejemplo de credenciales:
+            </h3>
+
+            <p className="mb-1">
+              <span className="font-medium text-slate-300">Email:</span>
+              <br />
+              usuario@centinela.cl
+            </p>
+
+            <p>
+              <span className="font-medium text-slate-300">Contraseña:</span>
+              <br />
+              Primeros 6 dígitos del RUT
+              <br />
+              <span className="italic text-slate-500">
+                Ej: RUT 12345678-9 →{" "}
+                <span className="text-slate-300 font-semibold">123456</span>
+              </span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
