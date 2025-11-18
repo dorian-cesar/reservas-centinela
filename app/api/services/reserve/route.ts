@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -10,16 +12,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Llamada a la API externa
-    const res = await fetch(
-      "https://reserva-centinela.dev-wit.com/api/reservations/reserve",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, serviceId, seatNumber }),
-      }
-    );
+    const res = await fetch(API_URL + "/reservations/reserve", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId, serviceId, seatNumber }),
+    });
 
     const data = await res.json();
 

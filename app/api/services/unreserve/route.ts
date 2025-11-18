@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 function toChileDate(dateStr: string) {
   return new Date(
     new Date(dateStr).toLocaleString("en-CL", { timeZone: "America/Santiago" })
@@ -46,18 +48,15 @@ export async function POST(req: Request) {
       );
     }
 
-    const backendRes = await fetch(
-      "https://reserva-centinela.dev-wit.com/api/reservations/release-seat",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          serviceId,
-          seatNumber,
-        }),
-      }
-    );
+    const backendRes = await fetch(API_URL + "/reservations/release-seat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        serviceId,
+        seatNumber,
+      }),
+    });
 
     let data;
     try {

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export async function POST(req: Request) {
   let email, password;
   try {
@@ -21,7 +23,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const apiUrl = "https://reserva-centinela.dev-wit.com/api/auth/login";
+  const apiUrl = API_URL + "/auth/login";
 
   try {
     const res = await fetch(apiUrl, {

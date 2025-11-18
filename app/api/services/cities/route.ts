@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 
-const API_URL = "https://reserva-centinela.dev-wit.com/api/cities/map";
-// const API_URL = "http://192.168.8.24:4000/api/cities/map";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Cache en memoria (por instancia del servidor)
 let cachedCities: any = null;
@@ -18,7 +17,7 @@ export async function GET() {
     }
 
     // Llamada real a la API externa
-    const res = await fetch(API_URL, { method: "GET" });
+    const res = await fetch(API_URL + "/cities/map", { method: "GET" });
 
     if (!res.ok) {
       return NextResponse.json(

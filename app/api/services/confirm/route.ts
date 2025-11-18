@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -14,14 +16,11 @@ export async function POST(req: NextRequest) {
 
     const authorizationCode = "centinela";
 
-    const confirmRes = await fetch(
-      "https://reserva-centinela.dev-wit.com/api/reservations/confirm",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reservationId, authorizationCode }),
-      }
-    );
+    const confirmRes = await fetch(API_URL + "/reservations/confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reservationId, authorizationCode }),
+    });
 
     const data = await confirmRes.json();
 

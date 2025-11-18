@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -13,7 +15,7 @@ export async function GET(req: Request) {
     }
 
     const backendRes = await fetch(
-      `https://reserva-centinela.dev-wit.com/api/reservations/user/${userId}/confirmed`,
+      `${API_URL}/reservations/user/${userId}/confirmed`,
       { method: "GET" }
     );
 

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const origin = searchParams.get("origin");
@@ -13,8 +15,7 @@ export async function GET(req: Request) {
   }
 
   const apiRes = await fetch(
-    `https://reserva-centinela.dev-wit.com/api/services/search?origin=${origin}&destination=${destination}&date=${date}`,
-    // `http://192.168.8.24:4000/api/services/search?origin=${origin}&destination=${destination}&date=${date}`,
+    `${API_URL}/services/search?origin=${origin}&destination=${destination}&date=${date}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
