@@ -199,17 +199,17 @@ function DashboardContent() {
 
       <div className="container mx-auto px-4 py-6 md:py-8 space-y-6">
         {/* FILTROS */}
-        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="flex flex-col md:flex-row gap-4">
+        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-col xl:flex-row xl:items-end justify-between gap-4">
+          <div className="flex flex-col xl:flex-row xl:items-end gap-4 flex-1 flex-wrap">
             {/* ORIGEN */}
-            <div className="flex flex-col">
+            <div className="flex flex-col w-full xl:flex-1 min-w-[150px] xl:max-w-[300px]">
               <label className="text-slate-400 text-xs mb-1">
                 Ciudad de origen
               </label>
               <select
                 value={selectedOrigin}
                 onChange={(e) => setSelectedOrigin(e.target.value)}
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[300px]"
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 w-full"
               >
                 <option value="">Seleccionar</option>
 
@@ -222,7 +222,7 @@ function DashboardContent() {
             </div>
 
             {/* DESTINO */}
-            <div className="flex flex-col">
+            <div className="flex flex-col w-full xl:flex-1 min-w-[150px] xl:max-w-[300px]">
               <label className="text-slate-400 text-xs mb-1">
                 Ciudad destino
               </label>
@@ -230,7 +230,7 @@ function DashboardContent() {
                 value={selectedDestination}
                 onChange={(e) => setSelectedDestination(e.target.value)}
                 disabled={!selectedOrigin || destinations.length === 0}
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 min-w-[300px]
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 w-full
              disabled:bg-slate-700 disabled:text-slate-400"
               >
                 <option value="">Seleccionar</option>
@@ -243,7 +243,7 @@ function DashboardContent() {
             </div>
 
             {/* FECHA */}
-            <div className="flex flex-col">
+            <div className="flex flex-col w-full xl:flex-1 min-w-[150px] xl:max-w-[300px]">
               <label className="text-slate-400 text-xs mb-1">
                 Fecha de salida
               </label>
@@ -252,7 +252,7 @@ function DashboardContent() {
                   selectedDate
                     ? (() => {
                         const [y, m, d] = selectedDate.split("-").map(Number);
-                        return new Date(y, m - 1, d); // Fecha local, NO UTC
+                        return new Date(y, m - 1, d);
                       })()
                     : null
                 }
@@ -270,7 +270,7 @@ function DashboardContent() {
                 locale="es"
                 dateFormat="dd/MM/yyyy"
                 placeholderText="Seleccionar fecha"
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 min-w-[150px]"
+                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 w-full"
               />
             </div>
           </div>
