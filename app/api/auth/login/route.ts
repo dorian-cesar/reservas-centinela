@@ -31,14 +31,19 @@ export async function POST(req: Request) {
     });
 
     if (!res.ok) {
-      let errorMessage = "Error en la autenticación.";
+      let errorMessage = "Ocurrió un error al auntenticarse.";
       let status = res.status;
+
+      if (status === 401 || status === 403) {
+        errorMessage =
+          "Credenciales incorrectas. Email y/o contraseña inválida.";
+      }
 
       try {
         const errorData = await res.json();
-        if (errorData.message) {
+        if (errorData.message && status !== 401 && status !== 403) {
           errorMessage = errorData.message;
-        } else if (errorData.error) {
+        } else if (errorData.error && status !== 401 && status !== 403) {
           errorMessage = errorData.error;
         }
       } catch (e) {}
