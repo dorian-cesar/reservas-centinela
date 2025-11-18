@@ -139,6 +139,25 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
+          <div className="mt-6 rounded-xl border border-slate-800 bg-slate-900/40 p-3 shadow-sm">
+            <p className="font-semibold text-slate-200 text-sm mb-1 tracking-wide">
+              Credenciales de prueba:
+            </p>
+
+            <div className="space-y-1 text-sm">
+              <p className="flex items-center gap-2">
+                <span className="text-slate-500 w-20">Email:</span>
+                <span className="text-slate-300 font-medium">
+                  juan@centinela.cl
+                </span>
+              </p>
+
+              <p className="flex items-center gap-2">
+                <span className="text-slate-500 w-20">Password:</span>
+                <span className="text-slate-300 font-medium">123456</span>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
