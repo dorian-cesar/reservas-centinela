@@ -276,7 +276,12 @@ function BookingContent() {
       const result = await AppSwal.fire({
         icon: "warning",
         title: "Asiento confirmado",
-        text: "Este asiento ya fue confirmado. ¿Seguro que quieres liberarlo?",
+        html: `
+          <div style="text-align: center;">
+            <p style="margin-bottom: 2px;">Este asiento ya fue confirmado.</p>
+            <p>¿Seguro que quieres liberarlo?</p>
+          </div>
+        `,
         showCancelButton: true,
         confirmButtonText: "Sí, liberar",
         cancelButtonText: "Cancelar",
