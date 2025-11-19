@@ -146,7 +146,7 @@ export default function LoginPage() {
             <p className="mb-1">
               <span className="font-medium text-slate-300">Email:</span>
               <br />
-              usuario@centinela.cl
+              usuario@mineracentinela.cl
             </p>
 
             <p>

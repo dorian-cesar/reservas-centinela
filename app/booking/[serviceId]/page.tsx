@@ -116,6 +116,28 @@ function BookingContent() {
   const handleSeatSelect = async (seatNumber: string) => {
     if (!userId || !service || isLoading) return;
 
+    const toChileDate = (dateStr: string) =>
+      new Date(
+        new Date(dateStr).toLocaleString("en-CL", {
+          timeZone: "America/Santiago",
+        })
+      );
+
+    const nowChile = toChileDate(new Date().toISOString());
+    const departureChile = toChileDate(service.date);
+    const diffMs = departureChile.getTime() - nowChile.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+
+    if (diffHours < 48) {
+      AppSwal.fire({
+        icon: "warning",
+        title: "No se puede reservar",
+        text: "No puedes reservar asientos porque faltan menos de 48 horas para la salida.",
+        confirmButtonColor: "#dc2626",
+      });
+      return;
+    }
+
     if (userReservedSeats.length >= 1) {
       AppSwal.fire({
         icon: "info",
@@ -131,8 +153,14 @@ function BookingContent() {
     try {
       const res = await fetch("/api/services/reserve", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, serviceId: service._id, seatNumber }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId,
+          serviceId: service._id,
+          seatNumber,
+        }),
       });
 
       const data = await res.json();
@@ -156,18 +184,15 @@ function BookingContent() {
             ),
           };
         });
-
         return;
       }
 
       setSelectedSeat(seatNumber);
       setUserReservedSeats((prev) => [...prev, seatNumber]);
-
       setReservationId(data.data.reservation._id);
       localStorage.setItem("reservationId", data.data.reservation._id);
     } catch (error: any) {
       console.error(error);
-
       AppSwal.fire({
         icon: "error",
         title: "Error",
