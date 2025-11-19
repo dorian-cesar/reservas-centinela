@@ -140,10 +140,23 @@ function BookingContent() {
       if (!res.ok) {
         AppSwal.fire({
           icon: "error",
-          title: "Error",
-          text: data.error || "No se pudo reservar el asiento",
+          title: "No disponible",
+          text: data.error || "Este asiento ya fue tomado.",
           confirmButtonColor: "#dc2626",
         });
+
+        setSelectedService((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            seats: prev.seats.map((s) =>
+              s.seatNumber === seatNumber
+                ? { ...s, reserved: true, reservedBy: "unknown" }
+                : s
+            ),
+          };
+        });
+
         return;
       }
 
@@ -154,6 +167,7 @@ function BookingContent() {
       localStorage.setItem("reservationId", data.data.reservation._id);
     } catch (error: any) {
       console.error(error);
+
       AppSwal.fire({
         icon: "error",
         title: "Error",
@@ -474,6 +488,9 @@ function BookingContent() {
           >
             Volver al listado
           </Button>
+          <p className="text-sm text-slate-400">
+            Recibirás un correo con tu ticket y detalles de la reserva.
+          </p>
         </Card>
       </div>
     );
