@@ -361,7 +361,7 @@ function DashboardContent() {
                       {/* TITULO + DETALLES */}
                       <div className="text-left">
                         <h3 className="text-base font-bold text-white">
-                          {service.origin} → {service.destination}
+                          {`#${service.serviceNumber} ${service.origin} → ${service.destination}`}
                         </h3>
 
                         <div className="mt-2 text-xs text-slate-300 space-y-1">

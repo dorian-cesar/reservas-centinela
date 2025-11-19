@@ -541,12 +541,10 @@ function BookingContent() {
               userReservedSeats={userReservedSeats}
               onSeatSelect={(seatNumber) => {
                 if (isLoading) return;
-
                 if (userReservedSeats.includes(seatNumber)) {
                   handleUnreserve(seatNumber);
                   return;
                 }
-
                 handleSeatSelect(seatNumber);
               }}
               seats={service.seats}

@@ -54,6 +54,7 @@ export interface ApiTemplate {
 export interface ApiBusService {
   _id: string;
   template: ApiTemplate;
+  serviceNumber: string;
   date: string;
   time: string;
   origin: string;
