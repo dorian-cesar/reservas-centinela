@@ -334,7 +334,12 @@ function BookingContent() {
     );
 
     if (!confirmedSeat) {
-      alert("No tienes ningún asiento confirmado.");
+      AppSwal.fire({
+        icon: "info",
+        title: "No hay asiento confirmado",
+        text: "No tienes ningún asiento confirmado.",
+        confirmButtonColor: "#f97316",
+      });
       return;
     }
 
@@ -345,7 +350,12 @@ function BookingContent() {
     const reservationId = userSeat?.reservationId;
 
     if (!reservationId) {
-      alert("No se encontró el reservationId para este asiento.");
+      AppSwal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se encontró el reservationId para este asiento.",
+        confirmButtonColor: "#dc2626",
+      });
       return;
     }
 
@@ -357,7 +367,12 @@ function BookingContent() {
       );
 
       if (!res.ok) {
-        alert("No se pudo descargar el PDF");
+        AppSwal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo descargar el PDF",
+          confirmButtonColor: "#dc2626",
+        });
         return;
       }
 
@@ -370,9 +385,14 @@ function BookingContent() {
       a.click();
 
       URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Error descargando el archivo");
+      AppSwal.fire({
+        icon: "error",
+        title: "Error",
+        text: err.message || "Error descargando el archivo",
+        confirmButtonColor: "#dc2626",
+      });
     } finally {
       setIsDownloading(false);
     }
