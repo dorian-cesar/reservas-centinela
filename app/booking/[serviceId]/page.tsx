@@ -321,12 +321,20 @@ function BookingContent() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString("es-CL", {
+    const raw = date.toLocaleDateString("es-CL", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
+    return raw
+      .toLowerCase()
+      .split(" ")
+      .map((word) => {
+        if (word === "de") return "de";
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join(" ");
   };
 
   // ---------------------------
@@ -384,7 +392,7 @@ function BookingContent() {
               </div>
               <div>
                 <p className="text-xs text-slate-400">Fecha</p>
-                <p className="text-base text-slate-200 capitalize">
+                <p className="text-base text-slate-200">
                   {formatDate(service.date)}
                 </p>
               </div>
@@ -398,7 +406,7 @@ function BookingContent() {
               <div>
                 <p className="text-xs text-slate-400">Hora de salida</p>
                 <p className="text-lg text-slate-200">
-                  {service?.template?.time}
+                  {service?.template?.time} hrs
                 </p>
               </div>
             </div>
@@ -496,7 +504,7 @@ function BookingContent() {
                   <div>
                     <p className="text-xs text-slate-400">Horario</p>
                     <p className="text-lg text-white">
-                      {service.template.time}
+                      {service.template.time} hrs
                     </p>
                   </div>
                 </div>
