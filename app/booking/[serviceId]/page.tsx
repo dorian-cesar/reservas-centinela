@@ -206,9 +206,46 @@ function BookingContent() {
   const handleUnreserve = async (seatNumber: string) => {
     if (!userId || !service || isLoading) return;
 
-    setIsLoading(true);
+    const toChileDate = (dateStr: string) =>
+      new Date(
+        new Date(dateStr).toLocaleString("en-CL", {
+          timeZone: "America/Santiago",
+        })
+      );
 
-    const departure = service.date;
+    const nowChile = toChileDate(new Date().toISOString());
+    const departureChile = toChileDate(service.date);
+
+    const diffMs = departureChile.getTime() - nowChile.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+
+    if (diffHours < 48) {
+      AppSwal.fire({
+        icon: "warning",
+        title: "No se puede liberar el asiento",
+        text: "No puedes liberar el asiento porque faltan menos de 48 horas para la salida.",
+        confirmButtonColor: "#dc2626",
+      });
+      return;
+    }
+
+    const seat = service.seats.find((s) => s.seatNumber === seatNumber);
+
+    if (seat?.confirmed) {
+      const result = await AppSwal.fire({
+        icon: "warning",
+        title: "Asiento confirmado",
+        text: "Este asiento ya fue confirmado. ¿Seguro que quieres liberarlo?",
+        showCancelButton: true,
+        confirmButtonText: "Sí, liberar",
+        cancelButtonText: "Cancelar",
+        confirmButtonColor: "#dc2626",
+      });
+
+      if (!result.isConfirmed) return;
+    }
+
+    setIsLoading(true);
 
     try {
       const res = await fetch("/api/services/unreserve", {
@@ -218,25 +255,16 @@ function BookingContent() {
           userId,
           serviceId: service._id,
           seatNumber,
-          serviceDepartureDateTime: departure,
         }),
       });
 
-      console.log("body unreserve:", {
-        userId,
-        serviceId: service._id,
-        seatNumber,
-        serviceDepartureDateTime: departure,
-      });
-
       const data = await res.json();
-      console.log("UNRESERVE FRONT RESPONSE:", data);
 
       if (!res.ok) {
         AppSwal.fire({
           icon: "info",
           title: "No se puede liberar el asiento",
-          text: "No se pudo desreservar el asiento. Es posible que falten menos de 48 horas para la salida.",
+          text: data.error || "No se pudo desreservar el asiento.",
           confirmButtonColor: "#dc2626",
         });
         return;
@@ -251,7 +279,6 @@ function BookingContent() {
         setSelectedSeat(null);
       }
 
-      // Actualiza store
       setSelectedService((prev) => {
         if (!prev) return prev;
         return {
@@ -261,6 +288,7 @@ function BookingContent() {
               ? {
                   ...s,
                   reserved: false,
+                  confirmed: false,
                   reservedBy: null,
                   reservationId: null,
                 }
