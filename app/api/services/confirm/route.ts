@@ -6,6 +6,11 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { reservationId } = body;
+    const token = req.headers.get("cookie")?.split("jwt=")[1];
+
+    if (!token) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
     if (!reservationId) {
       return NextResponse.json(
@@ -18,7 +23,10 @@ export async function POST(req: NextRequest) {
 
     const confirmRes = await fetch(API_URL + "/reservations/confirm", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ reservationId, authorizationCode }),
     });
 

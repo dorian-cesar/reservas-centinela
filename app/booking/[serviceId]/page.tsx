@@ -174,6 +174,7 @@ function BookingContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reservationId }),
+        credentials: "include",
       });
 
       const data = await res.json();
@@ -251,6 +252,7 @@ function BookingContent() {
       const res = await fetch("/api/services/unreserve", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           userId,
           serviceId: service._id,

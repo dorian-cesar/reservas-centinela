@@ -6,6 +6,11 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { userId, serviceId, seatNumber } = body;
+    const token = req.headers.get("cookie")?.split("jwt=")[1];
+
+    if (!token) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
     if (!userId || !serviceId || !seatNumber) {
       return NextResponse.json({ error: "Faltan datos" }, { status: 400 });
@@ -15,6 +20,7 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ userId, serviceId, seatNumber }),
     });

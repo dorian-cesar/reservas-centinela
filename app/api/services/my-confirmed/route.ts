@@ -3,6 +3,12 @@ import { NextResponse } from "next/server";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function GET(req: Request) {
+  const token = req.headers.get("cookie")?.split("jwt=")[1];
+
+  if (!token) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
@@ -16,7 +22,7 @@ export async function GET(req: Request) {
 
     const backendRes = await fetch(
       `${API_URL}/reservations/user/${userId}/confirmed`,
-      { method: "GET" }
+      { method: "GET", headers: { Authorization: `Bearer ${token}` } }
     );
 
     const data = await backendRes.json();

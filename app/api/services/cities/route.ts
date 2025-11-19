@@ -11,7 +11,6 @@ export async function GET() {
   try {
     const now = Date.now();
 
-    // Si está cacheado y no ha expirado → devolver cache
     if (cachedCities && now - lastFetchTime < CACHE_TTL) {
       return NextResponse.json(cachedCities);
     }
@@ -28,7 +27,6 @@ export async function GET() {
 
     const data = await res.json();
 
-    // Guardar en cache
     cachedCities = data;
     lastFetchTime = now;
 
