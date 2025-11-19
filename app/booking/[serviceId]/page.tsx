@@ -48,6 +48,7 @@ function BookingContent() {
   const [reservationId, setReservationId] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const user = getCurrentUser();
   const userId = user?._id;
@@ -310,6 +311,59 @@ function BookingContent() {
     }
   };
 
+  // Descargar ticket PDF
+  const downloadTicketPdf = async () => {
+    if (!service || !userId) return;
+
+    const confirmedSeat = service.seats.find(
+      (s) => s.confirmed && s.confirmedBy === userId
+    );
+
+    if (!confirmedSeat) {
+      alert("No tienes ningún asiento confirmado.");
+      return;
+    }
+
+    const userSeat = service.userConfirmedSeats.find(
+      (s) => s.seatNumber === confirmedSeat.seatNumber
+    );
+
+    const reservationId = userSeat?.reservationId;
+
+    if (!reservationId) {
+      alert("No se encontró el reservationId para este asiento.");
+      return;
+    }
+
+    setIsDownloading(true);
+
+    try {
+      const res = await fetch(
+        `/api/services/ticket-pdf?reservationId=${reservationId}`
+      );
+
+      if (!res.ok) {
+        alert("No se pudo descargar el PDF");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `ticket_${reservationId}.pdf`;
+      a.click();
+
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      alert("Error descargando el archivo");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   // ---------------------------
   // LOADING
   // ---------------------------
@@ -544,20 +598,13 @@ function BookingContent() {
 
                 return (
                   <Button
-                    onClick={() => {
-                      fetch(`/api/ticket-pdf?reservationId=${"123"}`, {
-                        method: "GET",
-                        credentials: "include",
-                      })
-                        .then((res) => res.blob())
-                        .then((blob) => {
-                          const url = URL.createObjectURL(blob);
-                          window.open(url, "_blank");
-                        });
-                    }}
+                    onClick={downloadTicketPdf}
+                    disabled={isDownloading}
                     className="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-xl cursor-pointer"
                   >
-                    Descargar Ticket en PDF
+                    {isDownloading
+                      ? "Descargando..."
+                      : "Descargar Ticket en PDF"}
                   </Button>
                 );
               })()}

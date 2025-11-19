@@ -28,6 +28,13 @@ export interface ApiBusLayoutFloor {
   _id: string;
 }
 
+export interface ApiUserConfirmedSeat {
+  seatNumber: string;
+  reservationId: string;
+  reservationStatus: "pending" | "confirmed" | "expired" | string; // según tu backend
+  reservationCreatedAt: string;
+}
+
 export interface ApiBusLayout {
   _id: string;
   name: string;
@@ -62,6 +69,7 @@ export interface ApiBusService {
   destination: string;
   busLayout: ApiBusLayout;
   seats: ApiSeat[];
+  userConfirmedSeats: ApiUserConfirmedSeat[];
   __v: number;
 }
 

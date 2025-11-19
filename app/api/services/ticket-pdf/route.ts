@@ -12,38 +12,33 @@ export async function GET(req: Request) {
     );
   }
 
-  if (!token) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
-
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const url = `${API_URL}/pdf/reservation/${reservationId}/pdf`;
 
-  const externalUrl = `${API_URL}/pdf/reservation/${reservationId}/pdf`;
-
-  // Llamamos al backend
-  const response = await fetch(externalUrl, {
+  // Llamar backend
+  const response = await fetch(url, {
     method: "GET",
     headers: {
-      Accept: "application/pdf",
       Authorization: `Bearer ${token}`,
     },
   });
 
   if (!response.ok) {
     return NextResponse.json(
-      { error: "Error fetching PDF" },
+      { error: "Error obteniendo PDF" },
       { status: response.status }
     );
   }
 
-  // Obtenemos PDF como buffer
-  const pdfBuffer = await response.arrayBuffer();
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
 
-  return new NextResponse(pdfBuffer, {
+  return new NextResponse(buffer, {
     status: 200,
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `inline; filename="reserva-${reservationId}.pdf"`,
+      "Content-Disposition": `inline; filename="pasaje-${reservationId}.pdf"`,
+      "Content-Length": buffer.length.toString(),
     },
   });
 }
