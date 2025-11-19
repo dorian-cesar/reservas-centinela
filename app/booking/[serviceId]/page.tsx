@@ -352,7 +352,7 @@ function BookingContent() {
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = `ticket_${reservationId}.pdf`;
+      a.download = `ticket_centinela_${reservationId}.pdf`;
       a.click();
 
       URL.revokeObjectURL(url);
@@ -365,7 +365,7 @@ function BookingContent() {
   };
 
   // ---------------------------
-  // LOADING
+  // LOADING SERVICIO
   // ---------------------------
   if (!service) {
     return (
