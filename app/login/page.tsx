@@ -41,7 +41,8 @@ export default function LoginPage() {
       const user = data.user;
       localStorage.setItem("auth_user", JSON.stringify(user));
       console.log(user);
-      router.push(user.role === "admin" ? "/admin" : "/dashboard");
+      // router.push(user.role === "admin" ? "/admin" : "/dashboard");
+      router.push("/dashboard");
     } catch (e) {
       console.error(e);
       setError("Error inesperado, por favor intenta nuevamente");
