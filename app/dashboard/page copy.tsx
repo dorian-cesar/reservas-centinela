@@ -38,8 +38,8 @@ function DashboardContent() {
   const router = useRouter();
   const user = getCurrentUser();
 
-  const { setServices: setGlobalServices } = useServicesStore();
-  const { setSelectedService } = useServicesStore();
+  const { setServices: setGlobalServices, setSelectedService } =
+    useServicesStore();
 
   const handleLogout = () => {
     logout();
@@ -139,6 +139,29 @@ function DashboardContent() {
     }
     setDestinations(citiesMap[selectedOrigin]);
   }, [selectedOrigin, citiesMap]);
+
+  // GUARDAR EN LOCAL STORAGE
+  useEffect(() => {
+    if (selectedOrigin) localStorage.setItem("origin", selectedOrigin);
+    if (selectedDestination)
+      localStorage.setItem("destination", selectedDestination);
+    if (selectedDate) localStorage.setItem("date", selectedDate);
+  }, [selectedOrigin, selectedDestination, selectedDate]);
+
+  // RESTAURAR AL CARGAR
+  useEffect(() => {
+    const savedOrigin = localStorage.getItem("origin");
+    const savedDestination = localStorage.getItem("destination");
+    const savedDate = localStorage.getItem("date");
+
+    if (savedOrigin) setSelectedOrigin(savedOrigin);
+    if (savedDestination) setSelectedDestination(savedDestination);
+    if (savedDate) setSelectedDate(savedDate);
+  }, []);
+
+  useEffect(() => {
+    setGlobalServices(services);
+  }, [services]);
 
   const hasReservationForService = (service: ApiBusService) =>
     service.seats?.some(

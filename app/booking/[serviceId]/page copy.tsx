@@ -37,7 +37,7 @@ function BookingContent() {
   const router = useRouter();
   const serviceId = params.serviceId as string;
 
-  const { selectedService, getServiceById, setSelectedService } =
+  const { selectedService, getServiceById, setSelectedService, setServices } =
     useServicesStore();
 
   const [service, setService] = useState<ApiBusService | null>(
@@ -49,6 +49,7 @@ function BookingContent() {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isLoadingPage, setIsLoadingPage] = useState(false);
 
   const user = getCurrentUser();
   const userId = user?._id;
@@ -111,6 +112,61 @@ function BookingContent() {
   };
 
   const finalLayout = buildFinalLayout();
+
+  useEffect(() => {
+    async function loadServiceFromParams() {
+      if (!serviceId) return;
+
+      const origin = localStorage.getItem("origin");
+      const destination = localStorage.getItem("destination");
+      const date = localStorage.getItem("date");
+
+      if (!origin || !destination || !date) {
+        console.warn(
+          "Faltan valores en storage, no se puede cargar servicios."
+        );
+        return;
+      }
+
+      setIsLoadingPage(true);
+
+      try {
+        const res = await fetch(
+          `/api/services/search?origin=${encodeURIComponent(
+            origin
+          )}&destination=${encodeURIComponent(
+            destination
+          )}&date=${encodeURIComponent(date)}`,
+          { credentials: "include" }
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          console.error("Error cargando servicios", data);
+          return;
+        }
+
+        setServices(data.data);
+        console.log("Servicios cargados desde params:", data.data);
+
+        const srv = data.data.find((s: ApiBusService) => s._id === serviceId);
+
+        if (srv) {
+          setSelectedService(srv);
+          setService(srv);
+        } else {
+          console.warn("Servicio no encontrado después de refrescar");
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingPage(false);
+      }
+    }
+
+    loadServiceFromParams();
+  }, [serviceId]);
 
   // Reservar asiento
   const handleSeatSelect = async (seatNumber: string) => {
