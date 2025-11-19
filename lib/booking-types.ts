@@ -19,6 +19,7 @@ export interface ApiSeat {
   reserved: boolean;
   _id: string;
   reservedBy: string | null;
+  confirmedBy: string | null;
   reservationId: string | null;
 }
 

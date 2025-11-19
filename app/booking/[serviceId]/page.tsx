@@ -466,7 +466,7 @@ function BookingContent() {
       <div className="container mx-auto px-4 py-6 md:py-8">
         <div className="grid lg:grid-cols-2 gap-6">
           {/* INFO */}
-          <div className="order-2 lg:order-1">
+          <div className="order-1">
             <Card className="bg-slate-900/50 border-slate-800 p-6">
               <h2 className="text-xl font-bold text-white">
                 Detalles del Servicio
@@ -531,10 +531,38 @@ function BookingContent() {
                 {isLoading ? "Confirmando..." : "Confirmar Reserva"}
               </Button>
             )}
+
+            {service &&
+              (() => {
+                const confirmedSeat = service.seats.find(
+                  (s) => s.confirmed && s.confirmedBy === userId
+                );
+
+                if (!confirmedSeat) return null;
+
+                return (
+                  <Button
+                    onClick={() => {
+                      fetch(`/api/ticket-pdf?reservationId=${"123"}`, {
+                        method: "GET",
+                        credentials: "include",
+                      })
+                        .then((res) => res.blob())
+                        .then((blob) => {
+                          const url = URL.createObjectURL(blob);
+                          window.open(url, "_blank");
+                        });
+                    }}
+                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white py-4 rounded-xl cursor-pointer"
+                  >
+                    Descargar Ticket en PDF
+                  </Button>
+                );
+              })()}
           </div>
 
           {/* LAYOUT */}
-          <div className="order-1 lg:order-2 relative">
+          <div className="order-2 relative">
             <BusSeatLayout
               layout={finalLayout}
               selectedSeat={selectedSeat}
