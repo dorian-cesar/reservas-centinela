@@ -3,10 +3,21 @@ import { NextResponse } from "next/server";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function GET(req: Request) {
-  const token = req.headers.get("cookie")?.split("jwt=")[1];
+  const cookieHeader = req.headers.get("cookie") || "";
+  const token = cookieHeader.split("jwt=")[1]?.split(";")[0];
 
   if (!token) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    const response = NextResponse.json(
+      { message: "Token inválido" },
+      { status: 401 }
+    );
+
+    response.headers.set(
+      "Set-Cookie",
+      "jwt=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict"
+    );
+
+    return response;
   }
 
   try {
@@ -26,10 +37,22 @@ export async function GET(req: Request) {
     );
 
     const data = await backendRes.json();
+    console.log("Respuesta del backend:", data);
+
+    if (data?.message === "Token inválido") {
+      const response = NextResponse.json(data, { status: 401 });
+
+      response.headers.set(
+        "Set-Cookie",
+        "jwt=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict"
+      );
+
+      return response;
+    }
 
     if (!backendRes.ok) {
       return NextResponse.json(
-        { error: data.error || "Error desde backend" },
+        { error: data.message || "Error desde backend" },
         { status: backendRes.status }
       );
     }

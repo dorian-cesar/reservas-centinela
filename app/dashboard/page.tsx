@@ -70,6 +70,11 @@ function DashboardContent() {
 
       const data = await res.json();
 
+      if (data?.message === "Token inválido") {
+        router.push("/login");
+        return;
+      }
+
       if (!res.ok) {
         console.error(data.error || "Error cargando reservas");
         setServices([]);
@@ -111,6 +116,11 @@ function DashboardContent() {
       });
 
       const data = await res.json();
+
+      if (data?.message === "Token inválido") {
+        router.push("/login");
+        return;
+      }
 
       if (!res.ok) {
         console.error(data.error || "Error cargando servicios");

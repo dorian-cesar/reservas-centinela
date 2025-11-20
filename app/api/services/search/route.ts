@@ -25,5 +25,15 @@ export async function GET(req: Request) {
 
   const data = await apiRes.json();
 
+  if (data?.message === "Token inválido") {
+    return new NextResponse(JSON.stringify({ message: "Token inválido" }), {
+      status: 401,
+      headers: {
+        "Set-Cookie":
+          "jwt=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Strict",
+      },
+    });
+  }
+
   return NextResponse.json(data);
 }
