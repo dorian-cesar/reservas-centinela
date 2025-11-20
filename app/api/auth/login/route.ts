@@ -36,8 +36,10 @@ export async function POST(req: Request) {
       let errorMessage = "Ocurrió un error al auntenticarse.";
       let status = res.status;
 
-      if (status === 401 || status === 403) {
+      if (status === 401) {
         errorMessage = "Credenciales incorrectas. RUT y/o contraseña inválida.";
+      } else if (status === 403) {
+        errorMessage = "Usuario desactivado.";
       }
 
       try {
