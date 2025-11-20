@@ -10,7 +10,7 @@ import Image from "next/image";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [rut, setRut] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -26,7 +26,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ rut, password }),
         credentials: "include",
       });
 
@@ -38,10 +38,7 @@ export default function LoginPage() {
         return;
       }
 
-      const user = data.user;
-      localStorage.setItem("auth_user", JSON.stringify(user));
-      console.log(user);
-      // router.push(user.role === "admin" ? "/admin" : "/dashboard");
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
       router.push("/dashboard");
     } catch (e) {
       console.error(e);
@@ -71,23 +68,22 @@ export default function LoginPage() {
           <p className="text-center text-slate-400 mb-8">Minera Centinela</p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* EMAIL */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">
-                Correo electrónico
+              <Label htmlFor="rut" className="text-slate-300 font-medium">
+                RUT
               </Label>
+
               <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="rut"
+                type="text"
+                value={rut}
+                onChange={(e) => setRut(e.target.value)}
                 className="bg-slate-800/50 border-slate-700 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-blue-500/20"
-                placeholder="usuario@centinela.cl"
+                placeholder="12345678-9"
                 required
               />
             </div>
 
-            {/* CONTRASEÑA */}
             <div className="space-y-2 relative">
               <Label htmlFor="password" className="text-slate-300">
                 Contraseña
@@ -101,6 +97,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 required
               />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -121,7 +118,6 @@ export default function LoginPage() {
               </div>
             )}
 
-            {/* BOTÓN LOGIN CON SPINNER */}
             <Button
               type="submit"
               disabled={isLoading}
@@ -139,15 +135,20 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
+
           <div className="mt-6 text-slate-400 text-sm border-t border-slate-800 pt-6">
             <h3 className="font-semibold text-slate-300 mb-2 text-center">
               Ejemplo de credenciales:
             </h3>
 
             <p className="mb-1">
-              <span className="font-medium text-slate-300">Email:</span>
+              <span className="font-medium text-slate-300">RUT:</span>
               <br />
-              usuario@mineracentinela.cl
+              12345678-9
+              <br />
+              <span className="text-slate-500 text-xs">
+                (Ingresar sin puntos, con guión)
+              </span>
             </p>
 
             <p>

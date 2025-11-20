@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: Request) {
-  let email, password;
+  let rut, password;
   try {
     const body = await req.json();
-    email = body.email;
+    rut = body.rut;
     password = body.password;
   } catch (error) {
     console.error("Error al parsear el cuerpo de la petición:", error);
@@ -16,20 +16,20 @@ export async function POST(req: Request) {
     );
   }
 
-  if (!email || !password) {
+  if (!rut || !password) {
     return NextResponse.json(
-      { error: "Faltan credenciales: 'email' y 'password' son requeridos." },
+      { error: "Faltan credenciales: 'rut' y 'password' son requeridos." },
       { status: 400 }
     );
   }
 
-  const apiUrl = API_URL + "/auth/login";
+  const apiUrl = API_URL + "/auth/loginRut";
 
   try {
     const res = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ rut, password }),
     });
 
     if (!res.ok) {
@@ -37,8 +37,7 @@ export async function POST(req: Request) {
       let status = res.status;
 
       if (status === 401 || status === 403) {
-        errorMessage =
-          "Credenciales incorrectas. Email y/o contraseña inválida.";
+        errorMessage = "Credenciales incorrectas. RUT y/o contraseña inválida.";
       }
 
       try {
