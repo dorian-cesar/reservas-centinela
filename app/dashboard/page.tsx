@@ -14,6 +14,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "@/styles/datepicker.css";
 import { es } from "date-fns/locale/es";
 import { fetchCities, type CitiesMap } from "@/lib/cities";
+import Swal from "sweetalert2";
 
 import { useServicesStore } from "@/lib/services-store";
 
@@ -26,6 +27,15 @@ export default function DashboardPage() {
     </AuthGuard>
   );
 }
+
+export const AppSwal = Swal.mixin({
+  customClass: {
+    popup: "swal2-popup",
+    confirmButton: "app-confirm-btn",
+    cancelButton: "app-cancel-btn",
+  },
+  buttonsStyling: false,
+});
 
 function DashboardContent() {
   const [services, setServices] = useState<ApiBusService[]>([]);
@@ -71,7 +81,17 @@ function DashboardContent() {
       const data = await res.json();
 
       if (data?.message === "Token inválido") {
-        router.push("/login");
+        AppSwal.fire({
+          icon: "warning",
+          title: "Sesión expirada",
+          text: "Tu sesión ha caducado. Por favor, inicia sesión nuevamente.",
+          confirmButtonColor: "#e11d48",
+        });
+
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+
         return;
       }
 
@@ -118,7 +138,17 @@ function DashboardContent() {
       const data = await res.json();
 
       if (data?.message === "Token inválido") {
-        router.push("/login");
+        AppSwal.fire({
+          icon: "warning",
+          title: "Sesión expirada",
+          text: "Tu sesión ha caducado. Por favor, inicia sesión nuevamente.",
+          confirmButtonColor: "#e11d48",
+        });
+
+        setTimeout(() => {
+          router.push("/login");
+        }, 2000);
+
         return;
       }
 

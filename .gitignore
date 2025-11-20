@@ -28,3 +28,6 @@ next-env.d.ts
 
 # archivos
 view.json
+/dashboard/page copy dashboard.tsx
+/booking/[serviceId]/page copy dashboard.tsx
+/backup
