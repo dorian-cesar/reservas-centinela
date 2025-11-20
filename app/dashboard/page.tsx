@@ -145,10 +145,19 @@ function DashboardContent() {
           confirmButtonColor: "#e11d48",
         });
 
-        setTimeout(() => {
-          router.push("/login");
-        }, 2000);
+        setTimeout(() => router.push("/login"), 2000);
+        return;
+      }
 
+      if (data?.error === "No autorizado") {
+        AppSwal.fire({
+          icon: "warning",
+          title: "Sesión expirada",
+          text: "Tu sesión ha caducado. Por favor, inicia sesión nuevamente.",
+          confirmButtonColor: "#e11d48",
+        });
+
+        setTimeout(() => router.push("/login"), 2000);
         return;
       }
 
@@ -160,7 +169,6 @@ function DashboardContent() {
       }
 
       const list = Array.isArray(data) ? data : [];
-
       setServices(list);
       setGlobalServices(list);
     } catch (err) {
