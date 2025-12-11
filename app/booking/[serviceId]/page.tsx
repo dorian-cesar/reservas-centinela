@@ -128,11 +128,11 @@ function BookingContent() {
     const diffMs = departureChile.getTime() - nowChile.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
 
-    if (diffHours < 48) {
+    if (diffHours < 12) {
       AppSwal.fire({
         icon: "warning",
         title: "No se puede reservar",
-        text: "No puedes reservar asientos porque faltan menos de 48 horas para la salida.",
+        text: "No puedes reservar asientos porque faltan menos de 12 horas para la salida.",
         confirmButtonColor: "#dc2626",
       });
       return;
