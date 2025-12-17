@@ -15,11 +15,7 @@ const withPWA = nextPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
-
-  // 👇 AQUÍ VA EL FALLBACK
-  fallbacks: {
-    document: "/offline",
-  },
+  navigateFallback: "/offline",
 
   runtimeCaching: [
     // ❌ NO cachear API Routes de Next
