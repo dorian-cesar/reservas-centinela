@@ -1,3 +1,5 @@
+import nextPWA from "next-pwa";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
@@ -6,6 +8,45 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+};
 
-export default nextConfig
+const withPWA = nextPWA({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development",
+
+  // 👇 AQUÍ VA EL FALLBACK
+  fallbacks: {
+    document: "/offline",
+  },
+
+  runtimeCaching: [
+    // ❌ NO cachear API Routes de Next
+    {
+      urlPattern: /^\/api\/.*/i,
+      handler: "NetworkOnly",
+    },
+
+    // ❌ NO cachear backend externo (reservas)
+    {
+      urlPattern: /^https:\/\/api\.centinela\.cl\/.*/i,
+      handler: "NetworkOnly",
+    },
+
+    // ✅ Cachear imágenes
+    {
+      urlPattern: /^https?.*\.(png|jpg|jpeg|svg|webp)$/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "images",
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 30 * 24 * 60 * 60,
+        },
+      },
+    },
+  ],
+});
+
+export default withPWA(nextConfig);

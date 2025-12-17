@@ -9,9 +9,21 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Reservas Tandem Centinela",
   description: "Sistema de reserva de pasajes de bus para Tandem Centinela",
+  manifest: "/manifest.json",
+  themeColor: "#0f172a",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Centinela",
+  },
   icons: {
-    icon: "/favicon.ico",
-    apple: "/apple-icon.png",
+    icon: "/icons/icon-512.png", // 👈 faltaba (Android / desktop)
+    apple: "/apple-icon-180.png",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover", // 👈 CLAVE para fullscreen iOS
   },
 };
 
