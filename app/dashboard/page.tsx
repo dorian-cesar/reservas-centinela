@@ -251,30 +251,30 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* HEADER */}
-      <header className="bg-slate-800/50 backdrop-blur-xl border-b border-slate-700 sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3 md:py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
+      {/* HEADER MÁS COMPACTO EN MOBILE */}
+      <header className="bg-slate-800/50 backdrop-blur-xl border-b border-slate-700 sticky top-0 z-40 py-2 md:py-3">
+        <div className="container mx-auto px-3 md:px-4 flex flex-col sm:flex-row items-center justify-between md:gap-3">
+          <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto">
             <Image
               src="/img/logo-tandem-2026.png"
               alt="Logo Tandem"
-              width={160}
-              height={40}
-              className="object-contain"
+              width={100}
+              height={25}
+              className="object-contain w-24 md:w-32 lg:w-40"
             />
-            <div>
-              <h1 className="text-lg md:text-xl font-bold text-white">
+            <div className="flex-1 sm:flex-none">
+              <h1 className="text-xs md:text-sm lg:text-base xl:text-lg font-bold text-white leading-tight">
                 Sistema de Reservas
               </h1>
-              <p className="text-xs md:text-sm text-slate-400">
+              <p className="text-[10px] md:text-xs text-slate-400 leading-tight">
                 Minera Centinela
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-slate-300">
-              <User className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="text-xs md:text-sm font-medium">
+          <div className="flex items-center gap-2 md:gap-3 w-full sm:w-auto justify-end">
+            <div className="flex items-center gap-1 md:gap-2 text-slate-300">
+              <User className="w-3 h-3 md:w-4 md:h-4" />
+              <span className="text-xs md:text-sm font-medium truncate max-w-20 md:max-w-30 lg:max-w-none">
                 {user?.name ? formatName(user.name) : ""}
               </span>
             </div>
@@ -282,26 +282,27 @@ function DashboardContent() {
               onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent cursor-pointer"
+              className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white bg-transparent cursor-pointer h-7 md:h-8 px-2 md:px-3 text-xs"
             >
-              <LogOut className="w-3 h-3 md:w-4 md:h-4 md:mr-2" />
+              <LogOut className="w-3 h-3 md:w-3 md:h-3 md:mr-1" />
               <span className="hidden md:inline">Salir</span>
+              <span className="md:hidden">Salir</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-6 md:py-8 space-y-6">
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-6 lg:py-8 space-y-4 md:space-y-6">
         {/* FILTROS */}
-        <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-col xl:flex-row xl:items-end justify-between gap-4">
-          <div className="flex flex-col xl:flex-row xl:items-end gap-4 flex-1 flex-wrap">
+        <div className="bg-slate-900/40 border border-slate-800 p-3 md:p-4 rounded-xl flex flex-col md:flex-col xl:flex-row xl:items-end justify-between gap-3 md:gap-4">
+          <div className="flex flex-col xl:flex-row xl:items-end gap-3 md:gap-4 flex-1 flex-wrap">
             {/* ORIGEN */}
             <div className="flex flex-col w-full xl:flex-1 min-w-37.5 xl:max-w-75">
               <label className="text-slate-400 text-xs mb-1">
                 Ciudad de origen
               </label>
               <Select value={selectedOrigin} onValueChange={setSelectedOrigin}>
-                <SelectTrigger className="w-full bg-slate-800 text-white border-slate-700 hover:bg-slate-700 hover:text-white">
+                <SelectTrigger className="w-full bg-slate-800 text-white border-slate-700 hover:bg-slate-700 hover:text-white h-9 md:h-10">
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
                 <SelectContent
@@ -328,7 +329,7 @@ function DashboardContent() {
                 disabled={!selectedOrigin || destinations.length === 0}
               >
                 <SelectTrigger
-                  className="w-full bg-slate-800 text-white border-slate-700 hover:bg-slate-700 hover:text-white
+                  className="w-full bg-slate-800 text-white border-slate-700 hover:bg-slate-700 hover:text-white h-9 md:h-10
                     disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
                 >
                   <SelectValue placeholder="Seleccionar" />
@@ -378,6 +379,8 @@ function DashboardContent() {
                 customInput={
                   <CustomDateInput placeholder="Seleccionar fecha" />
                 }
+                popperClassName="!z-[100] react-datepicker-above-header"
+                popperPlacement="top-start"
               />
             </div>
 
@@ -389,14 +392,16 @@ function DashboardContent() {
                 !selectedDestination ||
                 !selectedDate
               }
-              className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer w-full xl:w-auto ${
+              className={`bg-slate-700 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-lg shadow-md transition-all flex items-center gap-1 md:gap-2 cursor-pointer w-full xl:w-auto h-9 md:h-10 ${
                 isLoading
                   ? "opacity-60 cursor-not-allowed"
                   : "hover:bg-slate-800"
               }`}
             >
               <RotateCw
-                className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+                className={`w-3 h-3 md:w-4 md:h-4 ${
+                  isLoading ? "animate-spin" : ""
+                }`}
               />
               {isLoading ? "Buscando..." : "Buscar"}
             </Button>
@@ -405,12 +410,14 @@ function DashboardContent() {
           <Button
             onClick={loadMyConfirmedServices}
             disabled={isLoading}
-            className={`bg-green-800 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer w-full xl:w-auto ${
+            className={`bg-green-800 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-lg shadow-md transition-all flex items-center gap-1 md:gap-2 cursor-pointer w-full xl:w-auto h-9 md:h-10 mt-2 xl:mt-0 ${
               isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-green-900"
             }`}
           >
             <RotateCw
-              className={`w-4 h-4 ${isLoading ? "animate-spin" : ""}`}
+              className={`w-3 h-3 md:w-4 md:h-4 ${
+                isLoading ? "animate-spin" : ""
+              }`}
             />
             Mis asientos reservados
           </Button>
@@ -418,12 +425,12 @@ function DashboardContent() {
 
         {/* SERVICIOS */}
         <div>
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-4">
+          <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-white mb-3 md:mb-4">
             Servicios Disponibles
           </h2>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 md:gap-3">
             {services.length === 0 && !isLoading && (
-              <p className="text-slate-400 text-sm">
+              <p className="text-slate-400 text-xs md:text-sm">
                 No hay servicios disponibles
               </p>
             )}
@@ -434,30 +441,30 @@ function DashboardContent() {
               return (
                 <Card
                   key={service._id}
-                  className="bg-slate-900/60 border-blue-700/50 p-3 hover:border-blue-700 transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-4 w-full"
+                  className="bg-slate-900/60 border-blue-700/50 p-2 md:p-3 hover:border-blue-700 transition-all duration-300 flex flex-col sm:flex-row items-center justify-between gap-2 md:gap-4 w-full"
                 >
                   <img
                     src="/favicon.ico"
                     alt="Logo Tandem"
-                    className="w-12 h-12 object-contain"
+                    className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 object-contain"
                   />
 
                   <div className="flex-1">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
                       {/* TITULO + DETALLES */}
                       <div className="text-left">
-                        <h3 className="text-base font-bold text-white">
+                        <h3 className="text-sm md:text-base font-bold text-white">
                           {`#${service.serviceNumber} ${service.origin} → ${service.destination}`}
                         </h3>
 
-                        <div className="mt-2 text-xs text-slate-300 space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-3 h-3 text-slate-500" />
+                        <div className="mt-1 md:mt-2 text-xs text-slate-300 space-y-0.5 md:space-y-1">
+                          <div className="flex items-center gap-1 md:gap-2">
+                            <Calendar className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-500" />
                             <span>{formatDate(service.date)}</span>
                           </div>
 
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-3 h-3 text-slate-500" />
+                          <div className="flex items-center gap-1 md:gap-2">
+                            <Clock className="w-2.5 h-2.5 md:w-3 md:h-3 text-slate-500" />
                             <span>{service.template.time} hrs</span>
                           </div>
                         </div>
@@ -465,9 +472,11 @@ function DashboardContent() {
 
                       {/* BADGE */}
                       {reserved && (
-                        <div className="mt-2 inline-flex px-3 py-1 bg-green-600/20 border border-green-600 text-green-400 rounded-full text-xs font-medium items-center gap-1 w-fit lg:mt-0">
-                          <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                          Tienes un asiento reservado
+                        <div className="mt-1 md:mt-2 inline-flex px-2 py-0.5 md:px-3 md:py-1 bg-green-600/20 border border-green-600 text-green-400 rounded-full text-xs font-medium items-center gap-0.5 md:gap-1 w-fit lg:mt-0">
+                          <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-green-400 rounded-full"></span>
+                          <span className="text-xs">
+                            Tienes un asiento reservado
+                          </span>
                         </div>
                       )}
                     </div>
@@ -476,7 +485,7 @@ function DashboardContent() {
                   <Button
                     size="sm"
                     onClick={() => handleSelectService(service)}
-                    className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto cursor-pointer"
+                    className="bg-linear-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600 text-white font-semibold text-xs w-full sm:w-auto cursor-pointer h-8 md:h-9 mt-2 sm:mt-0"
                   >
                     Seleccionar Servicio
                   </Button>
