@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { AuthGuard } from "@/components/auth-guard";
 import { useState, useEffect } from "react";
 import { getCurrentUser, logout } from "@/lib/auth";
@@ -7,6 +8,13 @@ import { type ApiBusService, type Reservation } from "@/lib/booking-types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { X, Bus, Clock, Calendar, LogOut, User, RotateCw } from "lucide-react";
 import Image from "next/image";
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -19,6 +27,21 @@ import Swal from "sweetalert2";
 import { useServicesStore } from "@/lib/services-store";
 
 registerLocale("es", es);
+
+// Componente CustomInput para evitar el teclado en móviles
+const CustomDateInput = React.forwardRef<
+  HTMLDivElement,
+  { value?: string; onClick?: () => void; placeholder?: string }
+>(({ value, onClick, placeholder }, ref) => (
+  <div
+    ref={ref}
+    onClick={onClick}
+    className="w-full bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 cursor-pointer"
+  >
+    {value || placeholder}
+  </div>
+));
+CustomDateInput.displayName = "CustomDateInput";
 
 export default function DashboardPage() {
   return (
@@ -273,48 +296,58 @@ function DashboardContent() {
         <div className="bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col md:flex-col xl:flex-row xl:items-end justify-between gap-4">
           <div className="flex flex-col xl:flex-row xl:items-end gap-4 flex-1 flex-wrap">
             {/* ORIGEN */}
-            <div className="flex flex-col w-full xl:flex-1 min-w-[150px] xl:max-w-[300px]">
+            <div className="flex flex-col w-full xl:flex-1 min-w-37.5 xl:max-w-75">
               <label className="text-slate-400 text-xs mb-1">
                 Ciudad de origen
               </label>
-              <select
-                value={selectedOrigin}
-                onChange={(e) => setSelectedOrigin(e.target.value)}
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 w-full"
-              >
-                <option value="">Seleccionar</option>
-
-                {Object.keys(citiesMap).map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
+              <Select value={selectedOrigin} onValueChange={setSelectedOrigin}>
+                <SelectTrigger className="w-full bg-slate-800 text-white border-slate-700 hover:bg-slate-700 hover:text-white">
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-slate-800 border-slate-700 text-white w-full"
+                  position="popper"
+                >
+                  {Object.keys(citiesMap).map((city) => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* DESTINO */}
-            <div className="flex flex-col w-full xl:flex-1 min-w-[150px] xl:max-w-[300px]">
+            <div className="flex flex-col w-full xl:flex-1 min-w-37.5 xl:max-w-75">
               <label className="text-slate-400 text-xs mb-1">
                 Ciudad destino
               </label>
-              <select
+              <Select
                 value={selectedDestination}
-                onChange={(e) => setSelectedDestination(e.target.value)}
+                onValueChange={setSelectedDestination}
                 disabled={!selectedOrigin || destinations.length === 0}
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 appearance-none pr-10 w-full
-             disabled:bg-slate-700 disabled:text-slate-400"
               >
-                <option value="">Seleccionar</option>
-                {destinations.map((dest) => (
-                  <option key={dest} value={dest}>
-                    {dest}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger
+                  className="w-full bg-slate-800 text-white border-slate-700 hover:bg-slate-700 hover:text-white
+                    disabled:bg-slate-700 disabled:text-slate-400 disabled:cursor-not-allowed"
+                >
+                  <SelectValue placeholder="Seleccionar" />
+                </SelectTrigger>
+                <SelectContent
+                  className="bg-slate-800 border-slate-700 text-white w-full"
+                  position="popper"
+                >
+                  {destinations.map((dest) => (
+                    <SelectItem key={dest} value={dest}>
+                      {dest}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* FECHA */}
-            <div className="flex flex-col w-full xl:flex-1 min-w-[150px] xl:max-w-[300px]">
+            <div className="flex flex-col w-full xl:flex-1 min-w-37.5 xl:max-w-75">
               <label className="text-slate-400 text-xs mb-1">
                 Fecha de salida
               </label>
@@ -342,9 +375,12 @@ function DashboardContent() {
                 dateFormat="dd/MM/yyyy"
                 placeholderText="Seleccionar fecha"
                 minDate={todayChile}
-                className="bg-slate-800 text-white rounded-md px-3 py-2 text-sm border border-slate-700 w-full"
+                customInput={
+                  <CustomDateInput placeholder="Seleccionar fecha" />
+                }
               />
             </div>
+
             <Button
               onClick={loadServices}
               disabled={
@@ -353,7 +389,7 @@ function DashboardContent() {
                 !selectedDestination ||
                 !selectedDate
               }
-              className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer ${
+              className={`bg-slate-700 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer w-full xl:w-auto ${
                 isLoading
                   ? "opacity-60 cursor-not-allowed"
                   : "hover:bg-slate-800"
@@ -369,7 +405,7 @@ function DashboardContent() {
           <Button
             onClick={loadMyConfirmedServices}
             disabled={isLoading}
-            className={`bg-green-800 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer ${
+            className={`bg-green-800 text-white font-medium text-sm px-4 py-2 rounded-lg shadow-md transition-all flex items-center gap-2 cursor-pointer w-full xl:w-auto ${
               isLoading ? "opacity-60 cursor-not-allowed" : "hover:bg-green-900"
             }`}
           >

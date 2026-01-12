@@ -101,7 +101,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-200 transition-colors"
+                className="absolute right-3 top-8.5 text-slate-400 hover:text-slate-200 transition-colors"
                 tabIndex={-1}
               >
                 {showPassword ? (
