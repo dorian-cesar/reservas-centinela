@@ -214,7 +214,7 @@ function DashboardContent() {
 
   const hasReservationForService = (service: ApiBusService) =>
     service.seats?.some(
-      (s) => s.reservedBy === user?._id && s.confirmed === true
+      (s) => s.reservedBy === user?._id && s.confirmed === true,
     );
 
   const formatDate = (dateStr: string) => {
@@ -232,7 +232,7 @@ function DashboardContent() {
       .toLowerCase()
       .split(" ")
       .map((word) =>
-        word === "de" ? "de" : word.charAt(0).toUpperCase() + word.slice(1)
+        word === "de" ? "de" : word.charAt(0).toUpperCase() + word.slice(1),
       )
       .join(" ");
   };
@@ -247,7 +247,7 @@ function DashboardContent() {
   const todayChile = new Date(
     new Intl.DateTimeFormat("en-CL", {
       timeZone: "America/Santiago",
-    }).format(new Date())
+    }).format(new Date()),
   );
 
   return (
@@ -379,7 +379,7 @@ function DashboardContent() {
                             })
                               .format(date)
                               .replaceAll("/", "-")
-                          : ""
+                          : "",
                       )
                     }
                     locale="es"
@@ -433,6 +433,15 @@ function DashboardContent() {
                 />
                 Mis asientos reservados
               </Button>
+            </div>
+
+            {/* INSTRUCCIÓN DE CANCELACIÓN */}
+            <div>
+              <p className="text-slate-300 text-xs text-center">
+                Para cancelar tu pasaje, haz click en{" "}
+                <span className="font-semibold">"Mis asientos reservados"</span>
+                , selecciona tu viaje y haz click en tu asiento seleccionado.
+              </p>
             </div>
 
             {/* SERVICIOS */}
