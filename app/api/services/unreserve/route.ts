@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(req: Request) {
-  const token = req.headers.get("cookie")?.split("jwt=")[1];
+  const token = req.headers.get("cookie")?.split("jwt=")[1]?.split(";")[0];
 
   if (!token) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });

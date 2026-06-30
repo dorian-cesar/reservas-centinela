@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const reservationId = searchParams.get("reservationId");
-  const token = req.headers.get("cookie")?.split("jwt=")[1];
+  const token = req.headers.get("cookie")?.split("jwt=")[1]?.split(";")[0];
 
   if (!reservationId) {
     return NextResponse.json(

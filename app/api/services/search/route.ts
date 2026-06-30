@@ -8,7 +8,7 @@ export async function GET(req: Request) {
   const destination = searchParams.get("destination");
   const date = searchParams.get("date");
 
-  const token = req.headers.get("cookie")?.split("jwt=")[1];
+  const token = req.headers.get("cookie")?.split("jwt=")[1]?.split(";")[0];
 
   if (!token) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });

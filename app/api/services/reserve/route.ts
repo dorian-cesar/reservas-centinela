@@ -6,7 +6,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { userId, serviceId, seatNumber } = body;
-    const token = req.headers.get("cookie")?.split("jwt=")[1];
+    const token = req.headers.get("cookie")?.split("jwt=")[1]?.split(";")[0];
 
     if (!token) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
